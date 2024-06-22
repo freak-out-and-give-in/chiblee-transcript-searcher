@@ -1,0 +1,62 @@
+------------------------------------------------------------------------------------------------------------
+CHANGE/ADD BACKEND FEATURES:
+
+
+- Backend TODO:
+Copy the business logic necessary to DatabaseParsingService to make it work
+Add the DatabaseParsing methods necessary to the controllers
+Result should be being able to search and the actual results of our logic pop up as results
+------------------------------------------------------------------------------------------------------------
+CHANGE/ADD FRONTEND FEATURES:
+
+
+- Frontend TODO:
+(do backend first before this)
+Do some work to make the Javascript work with the back end, including making the individual option work
+
+Add good form-validation
+Make admin page nicer
+
+
+- Frontend general ideas:
+Feature where you can open up a bigger, modal view of a card with a button in its top left corner w/ css transition
+Feature where you can give feedback/suggestions for the site
+Feature that highlights the text that is currently being spoken in the transcript
+doesnt load all yt videos (though perhaps their thumbnails?), instead you can click on it and it brings up the modal
+
+
+- Easter eggs:
+Could dedicate an entire JS file for the easter eggs and look up ways to obfuscate it from being read
+    (https://stackoverflow.com/questions/6869312/how-do-i-hide-javascript-code-in-a-webpage)
+------------------------------------------------------------------------------------------------------------
+TESTING:
+
+
+- Automatic:
+Write unit tests
+Write integration tests
+Write system tests (?)
+Write Selenium automation tests
+------------------------------------------------------------------------------------------------------------
+ERRORS:
+
+
+- Loading YT videos
+Not an error right now, but if it's too network intensive then we can only load the yt videos if they click on them
+------------------------------------------------------------------------------------------------------------
+ATTRIBUTION:
+
+
+- Feature:
+Add in a button/hover/something which credits assets used in the website
+
+
+- Credit:
+Ask ArtFart for permission to use their image for the favicon (searched 'chib' on art discord, page 9)
+(https://www.flaticon.com/free-icon/thanks_11005470?term=thanks&page=1&position=2&origin=search&related_id=11005470)
+    with: <a href="https://www.flaticon.com/free-icons/thanks" title="thanks icons">Thanks icons created by Freepik - Flaticon</a>
+
+
+- No need to credit:
+Question mark icon: https://uxwing.com/query-what-how-why-icon/
+------------------------------------------------------------------------------------------------------------

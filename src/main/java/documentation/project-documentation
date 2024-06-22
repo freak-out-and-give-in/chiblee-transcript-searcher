@@ -1,0 +1,62 @@
+------------------------------------------------------------------------------------------------------------
+TEXT-ISSUES WITH CHARACTERS:
+
+
+- Illegal Characters (18/4/24):
+1. only in the names of the transcript files will there be the weird vertical bar.
+    in our transcripts it will be the regular vertical bar |.
+    i think the weird bar might be a yt-dlp thing, because it's only there -
+    in the normal yt titles its the regular vertical bar.
+2. TranscriptUseTest.checkIfAnyTitlesHaveIllegalCharacters();
+    does catch any illegal characters in our file titles, though not exhaustive in making sure titles are 1-1.
+    this is because sometimes it doesn't convert it to an illegal character it just converts it to a legal one.
+    so there has to be some manual testing, of going through the titles and checking if anything has been converted (but to a legal char)
+
+
+- Phantom Space Issue(18/4/24):
+titles with phantom space(actual on yt, file name):
+FAMILY FEUD WITH TWITCH CHAT .. WHAT COULD GO WRONG, FAMILY FEUD WITH TWITCH CHAT ..  WHAT COULD GO WRONG
+Is this game better than ALT F4? | Commando Hero, Is this game better than ALT F4?  | Commando Hero
+The best worst game of all time? (Heavy Rain Part 1), The best worst game of all time?  (Heavy Rain Part 1)
+LOST EPISODE . SEASON FINALE . - The Parting Dead Part 5, LOST EPISODE . SEASON FINALE .  - The Parting Dead Part 5
+GETTING CHAT ADDICTED TO HORSE RACING - Rival Stars Horse Racing, GETTING CHAT ADDICTED TO HORSE RACING  - Rival Stars Horse Racing
+Chiblee streams; Gartic phone // geoguesser with celebrities, Chiblee streams;  Gartic phone // geoguesser with celebrities
+CHIBLEE STREAMS; Tokyo 2021 videogame release 23RD JUNE 21, CHIBLEE STREAMS; Tokyo 2021 videogame release  23RD JUNE 21
+THE SIMS ADDED A BR? [Modded Sims 4 Part 2], THE SIMS ADDED A BR?  [Modded Sims 4 Part 2]
+CHIBLEE B'DAY ANTICS 2022, CHIBLEE B'DAY ANTICS  2022
+500 People VS One Wheel Of Fortune Lobby (AGAIN) .. - Wheel of Fortune, 500 People VS One Wheel Of Fortune Lobby (AGAIN)  .. - Wheel of Fortune
+
+Text with a phantom space:
+A Sad Tale Of A Man & His Car .. | Jalopy -> "should take that  back they can't do"
+    (yt-dlp problem) he says shit where the extra space is
+Chib Plays Piano [_rfj7wvHm9w] -> "what the go away  off yo target"
+    (yt-dlp problem) he says fuck where the extra space is
+
+Conclusion:
+chiblee hasn't intentionally double spaced any title
+    every title's double space either comes before or after a symbol or number
+2 transcript's text have a random space in them.
+    both times he said a swear word and yt-dlp interpreted it as a space somehow,
+    and that space starts at the beginning of a new line every time, so its really only 1 space
+root cause is yt-dlp, not me
+
+Fixed by:
+done in the method that reads the files (right at the start),
+we use convertIllegalFileNameCharactersBackToNormal() and convertLegalFileNameCharactersBackToNormal()
+this changes any phantom spacing in the title to a single space, and any in the text to explicit
+------------------------------------------------------------------------------------------------------------
+OTHER ISSUES:
+
+
+- Spring Boot loading stylesheets/scripts (6/6/24):
+When I load the webpages from the Intellij they load, but when I run Spring Boot and look at localhost they are blocked,
+the solution to this is to change the file path (remove the /static from the beginning)
+I've had this happen before but I haven't worked on this for a while so I forgot
+------------------------------------------------------------------------------------------------------------
+Interesting things:
+- If in this documentation there aren't dates for information, then it was written on the same date as it's title
+- The transcript with the name "Animal Crossing Gamecube (Alpha build footage) 1999" only contains 92 characters.
+- The titles "Fortnite with Friends" and "Mario Kart with Chat (Part 8)" are both used as titles in 2 separate videos,
+    leading to the key now also containing the id as the title is no longer unique. (21/4/24)
+- The largest parsed text has 400,000 characters, so that's why our MYSQL uses MEDIUMTEXT - which is good up to 16.7m characters
+------------------------------------------------------------------------------------------------------------

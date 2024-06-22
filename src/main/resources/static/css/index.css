@@ -1,0 +1,263 @@
+@font-face {
+    font-family: 'OldChibleeFont';
+    src: url('../fonts/videophreak-webfont.woff2') format('woff2'),
+         url('../fonts/videophreak-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+html, body {
+    height: 100%;
+    background: var(--container-color);
+}
+
+.container {
+    display: grid;
+    grid-template: 1fr 5fr / 1fr;
+
+    height: 100%;
+    --border-radius-container: 10px;
+
+    /* These 3 attributes make the container stays the same viewport sort of width and not an absolute width */
+    max-width: none;
+    width: auto;
+    margin: 0 16vw;
+}
+
+.title-link-attribution-container {
+    display: grid;
+    grid-template: 1fr / 3fr 1fr;
+    place-items: center;
+
+    min-height: 150px;
+    background: var(--title-container-color);
+    border-radius: 0 0 var(--border-radius-container) var(--border-radius-container);
+
+    .title-link-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .title-container {
+            button {
+                background: none;
+                border: none;
+
+                h1 {
+                    display: inline;
+                    font-size: 3.2rem;
+
+                    font-family: 'OldChibleeFont';
+                    color: var(--title-color);
+                }
+            }
+        }
+
+        a {
+            font-family: 'Arial Black', 'Arial Bold', Gadget, sans-serif;
+            color: var(--vod-hyperlink-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            transform: scale(1.1);
+        }
+    }
+
+    .attribution-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        p {
+            margin: 0;
+        }
+
+        button {
+            background: var(--title-container-color);
+            border: none;
+            filter: brightness(110%);
+            border-radius: 10%;
+
+            img {
+                width: 60px;
+                height: 60px;
+            }
+
+            p {
+                color: var(--attribution-text-color);
+                font-weight: bold;
+                font-style: italic;
+            }
+        }
+    }
+}
+
+.results-search-container {
+    background: var(--results-search-container-color);
+
+    margin: 30px;
+    padding: 20px;
+    border-radius: var(--border-radius-container);
+    --search-results-margin: 20px;
+
+    .search-container {
+        margin: var(--search-results-margin);
+
+        .explanation-container {
+            display: grid;
+            grid-template: 1fr / 1fr 1fr;
+
+            height: 100%;
+            width: 100%;
+
+            p {
+                margin: 0;
+
+                font-size: 0.8em;
+                color: var(--explanation-para-color);
+            }
+
+            .explanation {
+            }
+
+            .custom-tooltip {
+              --bs-tooltip-bg: var(--bd-violet-bg);
+              --bs-tooltip-color: var(--bs-white);
+            }
+
+            /* Used if selected 'Phrases' */
+            .word-count-p {
+                text-align: center;
+            }
+
+            /* Used if selected 'Individual' and the id is needed */
+            .yt-id-p {
+                text-align: center;
+            }
+
+            img {
+                margin-left: 6px;
+            }
+        }
+
+        form {
+            display: grid;
+            grid-template: 1fr / 1fr 8fr 1fr 12fr;
+            place-items: center;
+
+            select {
+                min-width: 140px;
+                margin-top: 16px;
+
+                background: var(--input-background-color);
+                color: var(--input-text-color);
+                text-align: center;
+                border-radius: 8px 0 0 8px;
+                border: 0;
+                padding-right: 16px;
+            }
+
+            input {
+                height: 46px;
+
+                border: 0;
+                font-size: 1.2rem;
+                background-color: var(--input-background-color);
+                color: var(--input-text-color);
+            }
+
+            /* Input search bar */
+            .search {
+                width: 100%;
+                min-width: 150px;
+                background: linear-gradient(to right, var(--divider-color) 1%, var(--input-background-color) 0%);
+                color: var(--input-text-color);
+                padding-left: 12px;
+            }
+
+            input::placeholder {
+                font-size: 1rem;
+                color: var(--input-text-color);
+            }
+
+            button {
+                width: 70px;
+                height: 40px;
+
+                margin: 0 15px;
+                background: var(--button-background-color);
+                color: var(--button-text-color);
+                border: none;
+                transition: none;
+            }
+
+            button:active {
+                background: var(--button-background-color);
+                color: var(--button-text-color);
+                filter: brightness(85%);
+            }
+
+            /* Used if selected 'Phrases' */
+            .word-count-inp {
+                width: 55px;
+
+                text-align: center;
+            }
+
+            /* Used if selected 'Individual' and the id is needed */
+            .yt-id-inp {
+                width: 150px;
+
+                text-align: center;
+            }
+
+            .word-count-inp:invalid, .yt-id-inp:invalid {
+                border: 2px solid red;
+            }
+
+            .word-count-inp:valid, .yt-id-inp:valid {
+                border: 2px solid green;
+            }
+        }
+    }
+
+    .results-container {
+        background: linear-gradient(to bottom, var(--divider-color) 6px, var(--results-search-container-color) 0%);
+
+        margin: 0 var(--search-results-margin) var(--search-results-margin) var(--search-results-margin);
+        padding-top: 50px;
+
+        .row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
+            grid-gap: 20px;
+
+            .col  {
+                width: 100%;
+
+                padding: 0;
+                margin: 0;
+
+                /* Border on the card, to stop bootstrap's 1px solid white */
+                .card {
+                    border: var(--card-border-width) solid var(--card-border-color);
+                    background: var(--card-background-color);
+
+                    /* padding for card's text, overriding the default 16px */
+                    .card-body {
+                        padding: 8px;
+
+                    }
+                }
+            }
+        }
+
+        /* The individual card doesn't have row as an ancestor, so the nested elements attributes arent used (above),
+        this is good for padding not applying, but not for the border, so we've just duplicated that code here.
+        border on the card, to stop bootstrap's 1px solid white */
+        .card {
+            border: var(--card-border-width) solid var(--card-border-color);
+        }
+    }
+}
