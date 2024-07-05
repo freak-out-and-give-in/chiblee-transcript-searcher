@@ -3,10 +3,59 @@ const csrfToken = getCookie('XSRF-TOKEN');
 
 
 // Fetching data from backend
-async function initialiseDatabase(event) {
+async function initialiseTranscripts(event) {
     event.preventDefault();
 
-    console.log('Attempting to initialise the database...');
+    const response = await fetch('/admin/initTranscripts', {
+            credentials: 'include',
+            method: 'POST',
+            headers: {
+                'X-XSRF-TOKEN': csrfToken
+            }
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error: ${response.status}`);
+            }
+
+            return response;
+        })
+        .then((result) => {
+            return result;
+        })
+        .catch((error) => {
+            console.log(`Could not fetch verse: ${error}`);
+        });
+}
+
+async function downloadTranscripts(event) {
+    event.preventDefault();
+
+    const response = await fetch('/admin/downloadTranscripts', {
+            credentials: 'include',
+            method: 'POST',
+            headers: {
+                'X-XSRF-TOKEN': csrfToken
+            }
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error: ${response.status}`);
+            }
+
+            return response;
+        })
+        .then((result) => {
+            return result;
+        })
+        .catch((error) => {
+            console.log(`Could not fetch verse: ${error}`);
+        });
+}
+
+async function initialiseInvertedIndexes(event) {
+    event.preventDefault();
+
     const response = await fetch('/admin/initDB', {
             credentials: 'include',
             method: 'POST',
@@ -19,7 +68,7 @@ async function initialiseDatabase(event) {
                 throw new Error(`HTTP error: ${response.status}`);
             }
 
-        return response;
+            return response;
         })
         .then((result) => {
             return result;
@@ -31,32 +80,35 @@ async function initialiseDatabase(event) {
 
 
 // Helper functions
-function addInitialiseDatabaseButton() {
-    initialiseDatabaseButton = document.createElement('button');
-    initialiseDatabaseButton.textContent = 'Initialise Database';
+function addButton(textContent, fetchEvent) {
+    button = document.createElement('button');
+    button.textContent = textContent;
 
-    initialiseDatabaseButton.addEventListener('click', (event) => {
-        initialiseDatabase(event);
+    button.addEventListener('click', (event) => {
+        fetchEvent(event);
     });
 
-    form.appendChild(initialiseDatabaseButton);
+    form.appendChild(button);
 }
 
 function getCookie(name) {
-  if (!document.cookie) {
-    return null;
-  }
+    if (!document.cookie) {
+        return null;
+    }
 
-  const xsrfCookies = document.cookie.split(';')
-    .map(c => c.trim())
-    .filter(c => c.startsWith(name + '='));
+    const xsrfCookies = document.cookie.split(';')
+        .map(c => c.trim())
+        .filter(c => c.startsWith(name + '='));
 
-  if (xsrfCookies.length === 0) {
-    return null;
-  }
-  return decodeURIComponent(xsrfCookies[0].split('=')[1]);
+    if (xsrfCookies.length === 0) {
+        return null;
+    }
+
+    return decodeURIComponent(xsrfCookies[0].split('=')[1]);
 }
 
 
 //Initialising the page
-addInitialiseDatabaseButton();
+addButton('Download transcripts', downloadTranscripts);
+addButton('Initialise transcripts', initialiseTranscripts);
+addButton('Initialise inverted index', initialiseInvertedIndexes);

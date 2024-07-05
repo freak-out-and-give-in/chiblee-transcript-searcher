@@ -59,4 +59,38 @@ Interesting things:
 - The titles "Fortnite with Friends" and "Mario Kart with Chat (Part 8)" are both used as titles in 2 separate videos,
     leading to the key now also containing the id as the title is no longer unique. (21/4/24)
 - The largest parsed text has 400,000 characters, so that's why our MYSQL uses MEDIUMTEXT - which is good up to 16.7m characters
+- Proud of writing InvertedIndexService.filterInvertedIndexForCloseTimestamps()
+------------------------------------------------------------------------------------------------------------
+Constants:
+- Phrase (2/7/24):
+Must be at least 2 characters long
+Must be less than 51 characters long
+Must only contain alphanumeric characters/spaces
+Can only find 100 videos of a phrase
+- Word count (4/7/24):
+Must be at least 1 character long
+Must be less than 101 characters long
+
+- Title (2/7/24):
+Must be at least 1 character long
+Must be less than 121 characters long
+
+- Video id (2/7/24):
+Must be 11 characters long
+Matches any non-whitespace character
+
+- Throwing exceptions (3/7/24):
+TranscriptService
+TranscriptParsingService
+InvertedIndexService
+InvertedIndexParsingService
+------------------------------------------------------------------------------------------------------------
+Sources:
+- The list of english StopWords - no credit needed - https://gist.github.com/sebleier/554280
+- Question mark icon - no credit needed - https://uxwing.com/query-what-how-why-icon/
+- Smile icon (edited) - no credit needed - https://www.reshot.com/free-svg-icons/item/happy-2XS5B3FYUL/
+- Thumbs up icon (edited) - no credit needed - https://www.reshot.com/free-svg-icons/item/happiness-A34ZNXUTLH/
+- Feedback icon (edited) - no credit needed - https://www.reshot.com/free-svg-icons/item/feedback-QWRFAYLJXN/
+
+- Ask ArtFart for permission to use their image for the favicon - credit needed - searched 'chib' on art discord, page 9
 ------------------------------------------------------------------------------------------------------------

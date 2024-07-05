@@ -3,46 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="The Chiblee transcript searcher finds the YouTube videos where Chiblee has said a given phrase.">
     <title>Chiblee transcript searcher</title>
 
     <!-- Bootstrap CSS & JS  -->
-    <link href="/static/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <script src="/static/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
+    <link href="/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <script src="/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- My own CSS & JS  -->
-    <link href="/static/css/index.css" rel="stylesheet">
-    <script src="/static/js/search.js" defer></script>
-    <script src="/static/js/results.js" defer></script>
-    <script src="/static/js/title.js" defer></script>
+    <link href="/css/index.css" rel="stylesheet">
+    <script src="/js/search.js" defer></script>
+    <script src="/js/results.js" defer></script>
+    <script src="/js/title.js" defer></script>
+    <script src="/js/e-e.js" defer></script>
 
     <!-- Favicon (Credit: ArtFart) -->
-    <link href="/static/images/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="/images/favicon.ico" rel="icon" type="image/x-icon">
 </head>
 <body>
 
 <div class="container">
-    <div class="title-link-attribution-container">
+    <header>
         <div class="title-link-container">
             <div class="title-container">
-                <button data-color-scheme="dark"><h1>Chiblee </h1></button>
-                <button data-color-scheme="light"><h1>transcript </h1></button>
-                <button data-color-scheme="murder"><h1>searcher</h1></button>
+                <h1>Chiblee </h1>
+                <button data-color-scheme="light" aria-label="Turns the 3 containers each into a respective color of the transgender pride flag">
+                    <h1>trans</h1>
+                </button>
+                <h1 class="cript">cript</h1>
+                <h1>searcher</h1>
             </div>
             <a href="https://www.youtube.com/@ChibleeVODs" target="_blank">https://www.youtube.com/@ChibleeVODs</a>
         </div>
         <div class="attribution-container">
-            <button><img src="/static/images/thanks.png" alt="thanks"></button>
+            <button id="attribution" aria-label="Shows a list of credits to people for using their assets">
+                <img src="/images/happy.png" alt="smiling face">
+            </button>
+            <button id="github" aria-label="Shows a link to this project on github">
+                <img src="/images/github-mark-white.png" alt="github logo">
+            </button>
+            <button id="feedback" aria-label="Shows text that encourages user feedback">
+                <img src="/images/feedback.png" alt="thumbs up">
+            </button>
+            <p></p>
         </div>
-    </div>
+    </header>
 
-    <div class="results-search-container">
-        <div class="search-container">
-            <div class="explanation-container"></div>
-            <form></form>
+    <main>
+        <div class="input-container">
+            <div class="search-container"></div>
+            <div class="extra-input-container"></div>
+            <div class="error-confirmation-container"></div>
         </div>
 
         <div class="results-container"></div>
-    </div>
+    </main>
 </div>
 
 

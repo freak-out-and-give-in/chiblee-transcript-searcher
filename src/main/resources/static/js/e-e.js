@@ -1,5 +1,7 @@
 // Global selectors
 const body = document.querySelector('body');
+const searchInput = document.querySelector('#search');
+const searchButton = document.querySelector('.search-button');
 
 
 // Super function that adds all the functions together
@@ -21,16 +23,37 @@ function addEasterEggContainer() {
 
 // Functions for adding specific easter eggs
 function addYaomingEasterEgg(easterEggContainer) {
-    const inputValue = document.querySelector('.search').value;
+    searchButton.addEventListener('click', () => {
+        const searchText = searchInput.value.toLowerCase();
 
-    async function waitUntilInputEqualsYaoming() {
-        await until(inputValue.includes('yaoming'));
+        if (searchText.includes('yao ming') || searchText.includes('yaoming')) {
+            const videoContainer = addVideoContainer();
 
-        let para = document.createElement('p');
-        para.className = 'yao';
-        para.textContent = 'hi yaoming!';
+            const video = document.createElement('video');
+            video.controls = true;
 
-        easterEggContainer.appendChild(para);
+            const source = document.createElement('source');
+            source.setAttribute('src', '/video/yaoming-video.mp4');
+            source.setAttribute('type', 'video/mp4');
+
+            video.appendChild(source);
+
+            // The video is removed once it has ended
+            video.addEventListener('ended', () => {
+                body.removeChild(videoContainer);
+            });
+
+            videoContainer.appendChild(video);
+        }
+    });
+
+    function addVideoContainer() {
+        const videoContainer = document.createElement('div');
+        videoContainer.className = 'e-e-video-container';
+
+        body.appendChild(videoContainer);
+
+        return videoContainer;
     }
 }
 

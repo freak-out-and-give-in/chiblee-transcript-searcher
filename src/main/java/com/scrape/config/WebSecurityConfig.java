@@ -30,13 +30,18 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers(
                                 "/",
-                                "/findThisPhrase",
+                                "/findPhrase",
+                                "/findTranscriptByTitle",
+                                "/findTranscriptByVideoId",
+                                "/robots.txt",
                                 "/admin/**",
                                 "/css/**",
                                 "/html/**",
                                 "/images/**",
                                 "/fonts/**",
                                 "/js/**",
+                                "/text/**",
+                                "/video/**",
                                 "/bootstrap-5.3.3-dist/**").permitAll()
                         .anyRequest().authenticated())
                 .csrf((csrf) -> csrf

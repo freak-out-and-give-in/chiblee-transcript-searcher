@@ -20,6 +20,7 @@ public class PageController {
     @GetMapping("/")
     public ModelAndView showIndexPage() {
         log.info("Loading the index page");
+
         return new ModelAndView("/html/index.html");
     }
 
@@ -33,5 +34,12 @@ public class PageController {
         }
 
         return new ModelAndView("/html/admin.html");
+    }
+
+    @GetMapping("/robots.txt")
+    public ModelAndView showRobotsTxtPage() {
+        log.info("Showing the robots.txt page");
+
+        return new ModelAndView("/text/robots.txt");
     }
 }

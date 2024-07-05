@@ -1,115 +1,98 @@
 // Global selectors
-let form = document.querySelector('form');
-let explanationContainer = document.querySelector('.explanation-container');
+let inputContainer = document.querySelector('.input-container');
+let searchContainer = document.querySelector('.search-container');
+let extraInputContainer = document.querySelector('.extra-input-container');
+let errorConfirmationContainer = document.querySelector('.error-confirmation-container');
 
 
 // Important variables list
-const phraseExplanation = 'This will list every time Chiblee has said the entered phrase';
-const phrasePlaceholder = 'i am the joker';
-const phraseWordCountExplanation = 'Word count each side';
-const phraseWordCountValue = '15';
-const phraseWordCountPlaceholder = '15';
-const phraseImageTooltipText = "For example: entering the phrase 'my trump impression', and setting '4' words each side\n" +
-     "will return: 'thank you that was my trump impression can I could I'";
+const phraseExplanation = 'Enter a phrase';
+const phrasePlaceholder = 'im the joker baby';
+const phraseWordCountExplanation = 'Word count';
+const phraseWordCountValue = '20';
+const phraseWordCountPlaceholder = '20';
+const wordCountMinimum = 0;
+const wordCountMaximum = 100;
 
-const individualExplanation = "This will list the transcript of the video with the entered title";
+const individualExplanation = "Enter the title of a youtube video from @ChibleeVODs";
 const individualPlaceholder = "HE CAN'T STOP HITTING NEW PBS (SM64 Part 5)";
-const individualIdExplanation = "There are multiple videos with this title, please also enter the video's id";
+const individualIdExplanation = "There are multiple videos with this title, or the title does not exist. Please also enter the video's id";
 const individualIdValue = ''
-const individualIdPlaceholder = 'QXvsq87UzOg';
-const individualImageTooltipText = "For example: the video 'https://www.youtube.com/watch?v=6MA39Rp4B5Y'\n" +
-    "has the id '6MA39Rp4B5Y'";
+const individualIdPlaceholder = 'mKhnheKTp98';
+const individualImageTooltipText = "e.g. this video has the id '6MA39Rp4B5Y': 'https://www.youtube.com/watch?v=6MA39Rp4B5Y'";
 
-const questionMarkImageSrc = '/static/images/question-mark-icon.png';
+const questionMarkImageSrc = '/images/question-mark-icon.png';
+const confirmationMessage = 'Successfully submitted';
 
 
 // Select options
 function addPhraseOptions() {
-    resetAndAddFormExplanationAndSelect(phraseExplanation);
+    removeInputContainerGrandChildren();
 
-    addInput(phrasePlaceholder);
-    addSearchButton();
-    addWordCountOrIdExplanationAndInput(true, phraseWordCountExplanation, phraseWordCountPlaceholder, phraseWordCountValue, phraseImageTooltipText);
+    addExplanationForSearch(searchContainer, phraseExplanation);
+    addSearchForm(false);
+
+    addWordCountOrId(true);
 }
 
 function addIndividualOptions() {
-    resetAndAddFormExplanationAndSelect(individualExplanation);
+    removeInputContainerGrandChildren();
 
-    addInput(individualPlaceholder);
-    addSearchButton();
-
-    // Only if the title isn't unique (duplicateTitleFlag):
-    addWordCountOrIdExplanationAndInput(false, individualIdExplanation, individualIdPlaceholder, individualIdValue, individualImageTooltipText);
+    addExplanationForSearch(searchContainer, individualExplanation);
+    addSearchForm(true);
 }
 
 
-// Combined functions for form
-function resetAndAddFormExplanationAndSelect(explanation) {
-    resetExplanationAndForm();
+// Combined functions
+// Adds the search part of the form to the search-container
+function addSearchForm(individualFlag) {
+    let form = document.createElement('form');
+    form.id = 'form';
+    searchContainer.appendChild(form);
 
-    addExplainingParagraph(explanation);
-    addSelectOptions(explanation);
+    addSelectOptions(form, individualFlag);
+
+    if (individualFlag) {
+        addSearchInput(form, individualPlaceholder, individualFlag);
+    } else {
+        addSearchInput(form, phrasePlaceholder, individualFlag);
+    }
+
+    addSearchButton(form);
 }
 
-function addWordCountOrIdExplanationAndInput(wordCountFlag, explanation, placeholder, value, imageTooltipText) {
-    addExplanationForWordCountOrId(wordCountFlag, explanation, imageTooltipText);
-    addWordCountOrIdInput(wordCountFlag, placeholder, value);
+// Removes everything other than the starting divs
+function removeInputContainerGrandChildren() {
+    searchContainer.replaceChildren();
+    extraInputContainer.replaceChildren();
+    errorConfirmationContainer.replaceChildren();
 }
 
+function addWordCountOrId(wordCountFlag) {
+    extraInputContainer.replaceChildren();
 
-// Helper functions used directly for form
-function addInput(placeholderText) {
-    input = document.createElement('input');
-    input.className = 'search';
-    input.placeholder = placeholderText;
-    input.required = true;
-
-    form.appendChild(input);
-}
-
-function addSearchButton() {
-    searchButton = document.createElement('button');
-    searchButton.className = 'btn btn-primary btn-sm';
-    searchButton.textContent = 'Submit';
-
-    // If submit is sent
-    searchButton.addEventListener('click', (event, inputValue) => {
-        searchButtonClick(event);
-    });
-
-    form.appendChild(searchButton);
+    addExplanationForWordCountOrId(wordCountFlag);
+    addWordCountOrIdInput(wordCountFlag);
 }
 
 
-// Helper functions used to be combined for form
-function resetExplanationAndForm() {
-    explanationContainer.replaceChildren();
-    form.replaceChildren();
-}
-
-function addExplainingParagraph(explanation) {
-    para = document.createElement('p');
-    para.className = 'explanation';
-    para.textContent = explanation;
-
-    explanationContainer.appendChild(para);
-}
-
-function addSelectOptions(explanation) {
-    select = document.createElement('select');
+// Helper functions for combined functions
+function addSelectOptions(form, individualFlag) {
+    let select = document.createElement('select');
+    select.id = 'select';
     select.className = 'form-select form-select-lg mb-3';
-    select.setAttribute('aria-label', 'Large select example');
+    select.setAttribute('aria-label', 'Pick a search type: phrase or individual');
 
-    optionPhrase = document.createElement('option');
+    let optionPhrase = document.createElement('option');
     optionPhrase.value = 'phrase';
     optionPhrase.setAttribute('name', 'phrase');
     optionPhrase.textContent = 'Phrase';
 
-    optionIndividual = document.createElement('option');
+    let optionIndividual = document.createElement('option');
     optionIndividual.value = 'individual';
     optionIndividual.setAttribute('name', 'individual');
     optionIndividual.textContent = 'Individual';
-    if (explanation.includes(individualExplanation)) {
+    if (individualFlag) {
         optionIndividual.selected = true;
     }
 
@@ -117,7 +100,7 @@ function addSelectOptions(explanation) {
     select.appendChild(optionIndividual);
 
     select.addEventListener('change', () => {
-        selectValue = document.querySelector('select').value;
+        selectValue = select.value;
 
         switch (selectValue) {
             case 'phrase': {
@@ -135,43 +118,124 @@ function addSelectOptions(explanation) {
     form.appendChild(select);
 }
 
-function addExplanationForWordCountOrId(wordCountFlag, explanation, imageTooltipText) {
-    para = document.createElement('p');
-    para.textContent = explanation;
+function addSearchInput(form, placeholderText, individualFlag) {
+    let input = document.createElement('input');
+    input.id = 'search';
+    input.placeholder = placeholderText;
+    input.required = true;
 
-    if (wordCountFlag) {
-        para.className = 'word-count-p';
+    if (individualFlag) {
+        input.ariaLabel = "Search for a video's transcript by entering a title";
     } else {
-        para.className = 'yt-id-p';
-    }
-
-    explanationContainer.appendChild(para);
-    para.appendChild(addImageTooltip(imageTooltipText));
-}
-
-function addWordCountOrIdInput(wordCountFlag, placeholder, value) {
-    input = document.createElement('input');
-    input.placeholder = placeholder;
-    input.value = value;
-
-    if (wordCountFlag) {
-        input.className = 'word-count-inp';
-        input.required = true;
-        input.type = 'number';
-        input.min = 0;
-        input.max = 30;
-    } else {
-        input.className = 'yt-id-inp';
-        input.required = true;
-        input.setAttribute('minlength', 11);
-        input.setAttribute('maxlength', 11);
+        input.ariaLabel = 'Search for the instances of a phrase by entering the wanted phrase';
     }
 
     form.appendChild(input);
 }
 
-function addImageTooltip(text) {
-    img = document.createElement('img');
+function addSearchButton(form) {
+    let searchButton = document.createElement('button');
+    searchButton.className = 'search-button btn btn-primary btn-sm';
+    searchButton.textContent = 'Submit';
+
+    // If submit is sent
+    searchButton.addEventListener('click', (event) => {
+        // Adds confirmation text that the form has been submitted
+        addConfirmationOrErrorText(confirmationMessage, true);
+        searchButtonClick(event);
+    });
+
+    form.appendChild(searchButton);
+}
+
+
+// Functions for search-container
+// Adds paragraph to explain the search type
+function addExplanationForSearch(container, explanation) {
+    let para = document.createElement('p');
+    para.className = 'explanation';
+    para.textContent = explanation;
+
+    container.appendChild(para);
+}
+
+
+// Functions for extra-input-container
+// Adds paragraph to word-count-or-id
+function addExplanationForWordCountOrId(wordCountFlag) {
+    let para = document.createElement('p');
+
+    if (wordCountFlag) {
+        para.className = 'word-count-p';
+        para.textContent = phraseWordCountExplanation;
+    } else {
+        para.className = 'yt-id-p';
+        para.textContent = individualIdExplanation;
+        para.appendChild(getImageTooltip(individualImageTooltipText));
+    }
+
+    extraInputContainer.appendChild(para);
+}
+
+// Adds input to word-count-or-id, and linked up with the form
+function addWordCountOrIdInput(wordCountFlag) {
+    let input = document.createElement('input');
+    // The form attribute equals the form's id
+    input.form = 'form';
+
+    if (wordCountFlag) {
+        input.id = 'word-count-inp';
+        input.placeholder = phraseWordCountPlaceholder;
+        input.value = phraseWordCountValue;
+        input.required = true;
+        input.ariaLabel = 'The amount of words that will show as text beneath each video result';
+        input.type = 'number';
+        input.min = wordCountMinimum;
+        input.max = wordCountMaximum;
+    } else {
+        input.id = 'yt-id-inp';
+        input.placeholder = individualIdPlaceholder;
+        input.value = individualIdValue;
+        input.required = true;
+        input.ariaLabel = "There are multiple videos with this title, or the title does not exist. Please also enter the video's id";
+        input.setAttribute('minlength', 11);
+        input.setAttribute('maxlength', 11);
+
+        // So the confirmation message doesn't show when nothing has been submitted and the id is needed
+        removeConfirmationOrErrorText();
+    }
+
+    extraInputContainer.appendChild(input);
+}
+
+
+// Functions for error-confirmation-container
+// Adds a box that displays a confirmation or error message
+function addConfirmationOrErrorText(message, confirmationFlag) {
+    removeConfirmationOrErrorText();
+
+    const confirmationOrErrorMessage = message;
+
+    let para = document.createElement('p');
+    para.textContent = confirmationOrErrorMessage;
+
+    if (confirmationFlag) {
+        para.className = 'confirmation-text';
+    } else {
+        para.className = 'error-text';
+    }
+
+    errorConfirmationContainer.appendChild(para);
+}
+
+function removeConfirmationOrErrorText() {
+    errorConfirmationContainer.replaceChildren();
+}
+
+
+// Helper functions for the functions
+function getImageTooltip(text) {
+    let img = document.createElement('img');
     img.src = questionMarkImageSrc;
     img.title = text;
     img.alt = img.title;
