@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class InvertedIndexParsingService {
@@ -98,9 +96,7 @@ public class InvertedIndexParsingService {
 
         // Removes start & end squiggly brackets
         invertedIndexString = invertedIndexString.substring(1, invertedIndexString.length() - 1);
-
-        // This stream has the end result of limiting the amount of videos found to 100
-        List<String> listOfInvertedIndexString = Stream.of(invertedIndexString.split("], ")).limit(100).toList();
+        List<String> listOfInvertedIndexString = List.of(invertedIndexString.split("], "));
 
         for (String tempInvertedIndex : listOfInvertedIndexString) {
             // Adding on the ending square bracket that's removed by split

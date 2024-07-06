@@ -140,7 +140,7 @@ public class TranscriptTxtParsingService {
         return mapOfTitleWithLines;
     }
 
-    public List<String> findTextBetweenArrowsAndTimestamp(String text) {
+    private List<String> findTextBetweenArrowsAndTimestamp(String text) {
         log.trace("Returning only the text between arrows of {}", text);
 
         if (text == null) {

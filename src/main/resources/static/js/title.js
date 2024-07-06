@@ -17,9 +17,11 @@ function addShowAttributionGithubOrFeedbackText() {
 
             switch (btn.id) {
                 case 'attribution': {
-                    newPara.textContent = "Thanks to ArtFart, who let me use their art as the website's icon";
+                    newPara.innerHTML = "Thanks to <a href=\"https://x.com/ArtFart69\" target=\"_blank\">ArtFart69</a>, who let me use their art as the website's icon";
+
                     const faviconImg = document.createElement('img');
                     faviconImg.src = '/images/favicon.ico';
+
                     newPara.appendChild(faviconImg);
 
                     break;

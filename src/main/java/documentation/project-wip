@@ -3,30 +3,18 @@ CHANGE/ADD BACKEND FEATURES TODO:
 
 
 - Backend:
-Form validation (libraries) / Security
-Limit amount of times you can submit, so you can't spam it - rate limiting
 ------------------------------------------------------------------------------------------------------------
 CHANGE/ADD FRONTEND FEATURES TODO:
 
 
 - Frontend:
-4 things to update: backend/frontend/security/testing
 
 
 - Easter eggs:
 ------------------------------------------------------------------------------------------------------------
 TESTING TODO:
-
-
-- Automatic:
 Write unit tests
 Write integration tests
 Write system tests (?)
 Write Selenium automation tests
-------------------------------------------------------------------------------------------------------------
-ERRORS:
-
-
-- Loading YT videos
-Not an error right now, but if it's too network intensive then we can only load the yt videos if they click on them
 ------------------------------------------------------------------------------------------------------------

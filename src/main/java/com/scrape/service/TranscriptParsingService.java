@@ -45,7 +45,7 @@ public class TranscriptParsingService {
     }
 
     private void validateWordCount(int wordCount) {
-        if (wordCount < 0) {
+        if (wordCount <= 0) {
             throw new InvalidWordCountException("The word count should be greater than 0");
         }
 

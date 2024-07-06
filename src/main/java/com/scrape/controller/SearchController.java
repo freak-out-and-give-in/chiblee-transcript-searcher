@@ -33,7 +33,7 @@ public class SearchController {
     @RateLimited
     @GetMapping("/findPhrase")
     public PhraseDto findPhrase(@RequestParam String phrase, @RequestParam int wordCount) {
-        log.info("Finding transcripts containing the phrase {} and whos word count is {}", phrase, wordCount);
+        log.info("Finding transcripts containing the phrase {} and with a word count of {}", phrase, wordCount);
 
         LinkedHashMap<String, List<Integer>> idAndTimestamps = invertedIndexParsingService.findThisPhrase(phrase);
         List<String> context = transcriptParsingService.getPhraseContext(idAndTimestamps, wordCount);

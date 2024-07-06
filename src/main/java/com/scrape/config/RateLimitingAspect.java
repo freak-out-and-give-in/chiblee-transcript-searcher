@@ -3,7 +3,7 @@ package com.scrape.config;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.scrape.demo.Exceptions.RateLimitExceededException;
+import com.scrape.exception.RateLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

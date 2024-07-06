@@ -1,7 +1,7 @@
 package com.scrape.config;
 
 import com.scrape.exception.*;
-import org.scrape.demo.Exceptions.RateLimitExceededException;
+import com.scrape.exception.RateLimitExceededException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

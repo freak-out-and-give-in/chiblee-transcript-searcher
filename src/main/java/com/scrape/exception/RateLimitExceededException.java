@@ -1,4 +1,4 @@
-package org.scrape.demo.Exceptions;
+package com.scrape.exception;
 
 public class RateLimitExceededException extends RuntimeException {
 

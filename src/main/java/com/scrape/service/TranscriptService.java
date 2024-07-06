@@ -72,7 +72,7 @@ public class TranscriptService {
         return videoId;
     }
 
-    // Takes about ~360 ms
+    // Efficient
     public LinkedHashMap<Integer, String> makeMapOfTimestampsAndText(String videoId) {
         // This stream can get the text/timestamps per video between 15-100ms, but most are ~20ms.
         // This is SIGNIFICANTLY faster compared to a conventional, non-streaming method.

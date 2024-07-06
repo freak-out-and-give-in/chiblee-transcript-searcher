@@ -45,6 +45,7 @@ public class InvertedIndexWritingService {
         invertedIndexService.deleteAll();
 
         log.info("Building the inverted index");
+        // TitleAndId, Timestamp, Text
         HashMap<String, LinkedHashMap<String, String>> transcripts = transcriptTxtParsingService.getTranscriptFromEachFile();
 
         return tokenizeRemoveStopWordsAndLemmatize(transcripts);
