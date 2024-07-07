@@ -15,3 +15,5 @@ It can find a phrase that Chiblee has said, or show an interactable list of word
 
 The phrase finder uses the Inverted index to very quickly find the occurences of a phrase, and the Transcript is used for showing the context of the phrase (which appers below the video).
 The 'individual' finder, which gives an interactable transcript for a certain video, works by giving the video's unique title or id to the Transcript table - which returns all the timestamps and text.
+
+![screenshot-of-search](https://github.com/freak-out-and-give-in/chiblee-transcript-searcher/assets/137592545/5a62a834-b5cc-4ee2-b2a9-99015ab0d8d8)
