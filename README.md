@@ -1,7 +1,7 @@
-The live-website of this application is here: WIP.
+The live-website of this application is here: WIP
 
-This is is a transcript searcher that searches the YouTube channel Of Chiblee - https://www.youtube.com/@ChibleeVODs.
-It can find a phrase that Chiblee has said, or show an interactable list of words he said in a particular video.
+This is a transcript searcher that searches the YouTube channel of Chiblee (https://www.youtube.com/@ChibleeVODs).
+This application finds every occurence of when a certain phrase was spoken, or shows an interactable list of words he said in a particular video.
 
 
 # How it works
