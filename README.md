@@ -4,7 +4,7 @@ This is a transcript searcher that searches the YouTube channel of Chiblee (http
 This application finds every occurence of when a certain phrase was spoken, or shows an interactable list of words he said in a particular video.
 
 
-# How it works
+# How it works (simplified)
 1. All of the transcripts are downloaded using yt-dlp, and stored as txt files.
 2. The txt files are then parsed and separated into separate lines, with it's timestamp and it's text.
 3. This parsing is used for creating 2 tables in a database: an Inverted index and one called 'Transcript'.
