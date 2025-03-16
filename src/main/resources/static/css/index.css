@@ -47,7 +47,7 @@ html, body {
     /* These 3 attributes make the container stays the same viewport sort of width and not an absolute width */
     max-width: none;
     width: auto;
-    margin: 0 16vw;
+    margin: 0 15vw;
 }
 
 .e-e-video-container {

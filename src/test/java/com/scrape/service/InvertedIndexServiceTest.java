@@ -39,6 +39,7 @@ class InvertedIndexServiceTest {
 
     @AfterEach
     void tearDown() {
+        invertedIndex = null;
     }
 
     @Test

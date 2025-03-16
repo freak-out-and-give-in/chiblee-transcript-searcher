@@ -78,6 +78,31 @@ async function initialiseInvertedIndexes(event) {
         });
 }
 
+async function downloadAll(event) {
+    event.preventDefault();
+
+    const response = await fetch('/admin/downloadAll', {
+            credentials: 'include',
+            method: 'POST',
+            headers: {
+                'X-XSRF-TOKEN': csrfToken
+            }
+        })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error: ${response.status}`);
+            }
+
+            return response;
+        })
+        .then((result) => {
+            return result;
+        })
+        .catch((error) => {
+            console.log(`Could not fetch verse: ${error}`);
+        });
+}
+
 
 // Helper functions
 function addButton(textContent, fetchEvent) {
@@ -109,6 +134,7 @@ function getCookie(name) {
 
 
 //Initialising the page
-addButton('Download transcripts', downloadTranscripts);
-addButton('Initialise transcripts', initialiseTranscripts);
-addButton('Initialise inverted index', initialiseInvertedIndexes);
+addButton('Download & initialise all', downloadAll);
+//addButton('Download transcripts', downloadTranscripts);
+//addButton('Initialise transcripts', initialiseTranscripts);
+//addButton('Initialise inverted index', initialiseInvertedIndexes);

@@ -28,6 +28,7 @@ public class TranscriptTxtWritingService {
         // Writing the transcripts should ALWAYS occur before updating the archive.
         // A downside is that if this fails during execution for whatever reason,
         // then the archive will not be accurate, and we'll have to start-a-new.
+
         writeTranscripts();
         deleteAllFilesWithDotOrig();
         populateOrUpdateArchive();
@@ -61,7 +62,7 @@ public class TranscriptTxtWritingService {
             String fileName = fileEntry.getName();
             String ending = fileName.substring(fileName.length() - 7);
             if (!ending.equals(".en.vtt")) {
-                //deletes all files with .orig (seemingly duplicates)
+                // Deletes all files with .orig (seemingly duplicates)
                 deleteTranscriptFile(fileName);
                 totalDeleted++;
             }

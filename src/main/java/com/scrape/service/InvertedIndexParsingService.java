@@ -114,19 +114,6 @@ public class InvertedIndexParsingService {
         return mapOfIdWithTimestamps;
     }
 
-    private List<String> splitTimestamps(String timestamps) {
-        log.debug("Splitting the timestamps {}", timestamps);
-
-        // Removes start & end square brackets
-        timestamps = timestamps.substring(1, timestamps.length() - 1);
-
-        if (timestamps.contains(", ")) {
-            return new ArrayList<>(Arrays.asList(timestamps.split(", ")));
-        } else {
-            return new ArrayList<>(List.of(timestamps));
-        }
-    }
-
     private LinkedHashMap<String, List<String>> filterInvertedIndexForCloseTimestamps(List<InvertedIndexDto> listOfInvertedIndexDtos) {
         log.debug("Filtering common ids with timestamps so only the timestamps close to each other are recognised as a part of a phrase");
 

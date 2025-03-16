@@ -1,20 +1,17 @@
 ------------------------------------------------------------------------------------------------------------
-CHANGE/ADD BACKEND FEATURES TODO:
-
-
+CHANGE/ADD FEATURES TODO
 - Backend:
-------------------------------------------------------------------------------------------------------------
-CHANGE/ADD FRONTEND FEATURES TODO:
 
 
 - Frontend:
+Make main page more zoomed out
+Make admin page look nicer & more structured
+Make 3 text popups not change shape when clicked
 
 
 - Easter eggs:
 ------------------------------------------------------------------------------------------------------------
-TESTING TODO:
-Write unit tests
-Write integration tests
-Write system tests (?)
-Write Selenium automation tests
+TESTING TODO
+
+
 ------------------------------------------------------------------------------------------------------------

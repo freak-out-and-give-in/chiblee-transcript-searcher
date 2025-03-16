@@ -24,18 +24,6 @@ public class PageController {
         return new ModelAndView("/html/index.html");
     }
 
-    @GetMapping("/admin")
-    public ModelAndView showAdminPage() {
-        log.info("Loading the admin page");
-
-        if (System.getenv("ADMIN-CODE") == null) {
-            log.warn("Cannot access the admin page because the system environment variable ADMIN-CODE is null");
-            throw new UnauthorizedAccessException("You do not have the authorization to access this page");
-        }
-
-        return new ModelAndView("/html/admin.html");
-    }
-
     @GetMapping("/robots.txt")
     public ModelAndView showRobotsTxtPage() {
         log.info("Showing the robots.txt page");

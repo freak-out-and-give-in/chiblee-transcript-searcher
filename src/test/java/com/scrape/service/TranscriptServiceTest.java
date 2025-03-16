@@ -39,6 +39,7 @@ class TranscriptServiceTest {
 
     @AfterEach
     void tearDown() {
+        transcript = null;
     }
 
     @Nested
