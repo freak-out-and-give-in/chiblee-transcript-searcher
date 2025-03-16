@@ -1,10 +1,10 @@
-The live-website of this application is here: WIP.
+The live-website of this application is here: WIP
 
-This is is a transcript searcher that searches the YouTube channel Of Chiblee - https://www.youtube.com/@ChibleeVODs.
-It can find a phrase that Chiblee has said, or show an interactable list of words he said in a particular video.
+This is a transcript searcher that searches the YouTube channel of Chiblee (https://www.youtube.com/@ChibleeVODs).
+This application finds every occurence of when a certain phrase was spoken, or shows an interactable list of words he said in a particular video.
 
 
-# How it works
+# How it works (simplified)
 1. All of the transcripts are downloaded using yt-dlp, and stored as txt files.
 2. The txt files are then parsed and separated into separate lines, with it's timestamp and it's text.
 3. This parsing is used for creating 2 tables in a database: an Inverted index and one called 'Transcript'.
@@ -15,3 +15,5 @@ It can find a phrase that Chiblee has said, or show an interactable list of word
 
 The phrase finder uses the Inverted index to very quickly find the occurences of a phrase, and the Transcript is used for showing the context of the phrase (which appers below the video).
 The 'individual' finder, which gives an interactable transcript for a certain video, works by giving the video's unique title or id to the Transcript table - which returns all the timestamps and text.
+
+![screenshot-of-search](https://github.com/freak-out-and-give-in/chiblee-transcript-searcher/assets/137592545/5a62a834-b5cc-4ee2-b2a9-99015ab0d8d8)
