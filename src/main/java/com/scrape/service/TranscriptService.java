@@ -24,9 +24,12 @@ public class TranscriptService {
 
     private TranscriptRepository transcriptRepository;
 
+    private BaseMethods baseMethods;
+
     @Autowired
     public TranscriptService(TranscriptRepository transcriptRepository) {
         this.transcriptRepository = transcriptRepository;
+        baseMethods = new BaseMethods();
     }
 
     public void save(Transcript transcript) {
@@ -72,23 +75,17 @@ public class TranscriptService {
         return videoId;
     }
 
-    // Efficient
+    // This method has been optimised
     public LinkedHashMap<Integer, String> makeMapOfTimestampsAndText(String videoId) {
-        // This stream can get the text/timestamps per video between 15-100ms, but most are ~20ms.
-        // This is SIGNIFICANTLY faster compared to a conventional, non-streaming method.
+        // This stream can get the text/timestamps per video between 15-100ms, but most are ~20ms
+        // This is SIGNIFICANTLY faster than a conventional, non-streaming method
 
         return Arrays.stream(getByVideoId(videoId).getTimestampsAndText()
                         .split("#hg"))
-                .collect(Collectors.toMap(text -> convertTimestampToSeconds(text.substring(0, 8)),
+                .collect(Collectors.toMap(text -> baseMethods.convertTimestampToSeconds(text.substring(0, 12)),
                         text -> text.substring(12),
                         // If there is a duplicate entry for a key, add the values together
                         (t1, t2) -> t1 + " " + t2, LinkedHashMap::new));
-    }
-
-    // Same method as InvertedIndexParsingService.convertTimestampToSeconds()
-    // e.g. 03:52:31 -> 13951
-    private int convertTimestampToSeconds(String timestamp) {
-        return LocalTime.parse(timestamp, DateTimeFormatter.ofPattern("HH:mm:ss")).toSecondOfDay();
     }
 
     public void deleteAll() {

@@ -29,10 +29,11 @@ public class TranscriptParsingService {
         log.debug("Getting the phrase's context");
 
         validateWordCount(wordCount);
-        List<String> textContext = new ArrayList<>();
 
+        List<String> textContext = new ArrayList<>();
         for (String videoId : idAndTimestamps.keySet()) {
-            LinkedHashMap<Integer, String> mapOfTimestampsAndText = transcriptService.makeMapOfTimestampsAndText(videoId);
+            LinkedHashMap<Integer, String> mapOfTimestampsAndText = transcriptService
+                    .makeMapOfTimestampsAndText(videoId);
 
             for (int timestampInSeconds : idAndTimestamps.get(videoId)) {
                 String text = buildTextFromTimestamp(mapOfTimestampsAndText, timestampInSeconds, wordCount);
@@ -54,7 +55,8 @@ public class TranscriptParsingService {
         }
     }
 
-    private String buildTextFromTimestamp(LinkedHashMap<Integer, String> mapOfTimestampsAndText, int startingTimestampInSeconds, int wordCount) {
+    private String buildTextFromTimestamp(LinkedHashMap<Integer, String> mapOfTimestampsAndText,
+                                          int startingTimestampInSeconds, int wordCount) {
         log.debug("Building text from a timestamp");
 
         StringBuilder sb = new StringBuilder();
@@ -108,7 +110,8 @@ public class TranscriptParsingService {
             int indexOfStartingText = sbString.indexOf(startingText);
 
             int beforeStartingTextWordCount = getWordCount(sbString.substring(0, indexOfStartingText));
-            int afterStartingTextWordCount = getWordCount(sbString.substring(indexOfStartingText + startingText.length()));
+            int afterStartingTextWordCount = getWordCount(sbString.substring(
+                    indexOfStartingText + startingText.length()));
 
             if (beforeStartingTextWordCount > afterStartingTextWordCount) {
                 // If there are more words before the starting text than after

@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -19,9 +17,12 @@ public class InvertedIndexParsingService {
 
     private InvertedIndexService invertedIndexService;
 
+    private BaseMethods baseMethods;
+
     @Autowired
     public InvertedIndexParsingService(InvertedIndexService invertedIndexService) {
         this.invertedIndexService = invertedIndexService;
+        baseMethods = new BaseMethods();
     }
 
     public LinkedHashMap<String, List<Integer>> findThisPhrase(String phrase) {
@@ -61,7 +62,7 @@ public class InvertedIndexParsingService {
         List<InvertedIndexDto> commonIdsWithTimestamps = getCommonIdsWithTimestamps(listOfInvertedIndexDtos);
         LinkedHashMap<String, List<String>> idsAndTimestamps = filterInvertedIndexForCloseTimestamps(commonIdsWithTimestamps);
 
-        return convertTimestampsToSeconds(idsAndTimestamps);
+        return convertTimestampsToSecondsAsMap(idsAndTimestamps);
     }
 
     private List<InvertedIndexDto> convertToInvertedIndexDtos(List<String> listOfWordsNotRemoved, String[] arrayOfWords, String phrase) {
@@ -273,24 +274,23 @@ public class InvertedIndexParsingService {
         return listOfCommonIds;
     }
 
-    private LinkedHashMap<String, List<Integer>> convertTimestampsToSeconds(LinkedHashMap<String, List<String>> idsAndTimestamps) {
+    private LinkedHashMap<String, List<Integer>> convertTimestampsToSecondsAsMap(LinkedHashMap<String, List<String>> idsAndTimestamps) {
         LinkedHashMap<String, List<Integer>> mapWithTimestampSeconds = new LinkedHashMap<>();
 
         for (Map.Entry<String, List<String>> entry : idsAndTimestamps.entrySet()) {
-            List<Integer> seconds = convertTimestampToSeconds(entry.getValue());
+            List<Integer> seconds = convertIdsAndTimestampsToSeconds(entry.getValue());
             mapWithTimestampSeconds.put(entry.getKey(), seconds);
         }
 
         return mapWithTimestampSeconds;
     }
 
-    // e.g. 03:52:31.040 -> 13951
-    private List<Integer> convertTimestampToSeconds(List<String> timestamps) {
+    public List<Integer> convertIdsAndTimestampsToSeconds(List<String> idsAndTimestamps) {
         List<Integer> listOfTimestamps = new ArrayList<>();
-        for (String timestamp : timestamps) {
-            timestamp = timestamp.substring(0, 8);
+        for (String idAndTimestamp : idsAndTimestamps) {
+            String timestamp = idAndTimestamp.substring(0, 12);
 
-            listOfTimestamps.add(LocalTime.parse(timestamp, DateTimeFormatter.ofPattern("HH:mm:ss")).toSecondOfDay());
+            listOfTimestamps.add(baseMethods.convertTimestampToSeconds(timestamp));
         }
 
         return listOfTimestamps;

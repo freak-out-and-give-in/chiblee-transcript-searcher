@@ -4,6 +4,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,19 +27,12 @@ class TranscriptWritingServiceTest {
     @Mock
     private TranscriptTxtParsingService transcriptTxtParsingService;
 
-    @BeforeEach
-    void setUp() {
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
-
-    @Test
-    void writeTranscriptsToDatabase() {
+    @ParameterizedTest
+    @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+    void writeTranscriptsToDatabase(String title, String id) {
         HashMap<String, LinkedHashMap<String, String>> map = new HashMap<>();
         LinkedHashMap<String, String> linkedMap = new LinkedHashMap<>();
-        map.put("this is the title of video [abcdefghijk]", linkedMap);
+        map.put(title + " [" + id + "]", linkedMap);
 
         when(transcriptTxtParsingService.getTranscriptFromEachFile()).thenReturn(map);
 

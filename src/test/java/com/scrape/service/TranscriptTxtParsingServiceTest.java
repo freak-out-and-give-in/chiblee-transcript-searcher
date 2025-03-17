@@ -2,8 +2,11 @@ package com.scrape.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -21,62 +24,122 @@ class TranscriptTxtParsingServiceTest {
     @InjectMocks
     private TranscriptTxtParsingService transcriptTxtParsingService;
 
-    @BeforeEach
-    void setUp() {
+    @ParameterizedTest
+    @CsvFileSource(resources = "/csv/service/transcript-txt-parsing-service/TranscriptTxtParsingServiceData.csv", numLinesToSkip = 1)
+    void getTranscriptPathWithFileName(String fileName, String expectedTranscriptPath) {
+        String actualTranscriptPath = transcriptTxtParsingService.getTranscriptPathWithFileName(fileName);
+
+        assertEquals(expectedTranscriptPath + fileName, actualTranscriptPath);
     }
 
-    @AfterEach
-    void tearDown() {
+    @Nested
+    class GetStopWords {
+
+        private List<String> stopWords;
+
+        @BeforeEach
+        void setUp() {
+            stopWords = transcriptTxtParsingService.getStopWords();
+        }
+
+        @AfterEach
+        void tearDown() {
+            stopWords = null;
+        }
+
+        @Test
+        void areAnyStopWordsEmpty() {
+            // Checks if every stop word is not empty
+            assertTrue(stopWords.stream().noneMatch(String::isEmpty));
+        }
+
+        @Test
+        void areThereManyStopWords() {
+            // Checks that the amount of stop words is roughly what is expected
+            assertTrue(stopWords.size() > 100);
+        }
+
     }
 
-    @Test
-    void getTranscriptPathWithFileName() {
-        String fileName = "TodayIsTheGreatest";
-        String transcriptsPath = transcriptTxtParsingService.getTranscriptPathWithFileName(fileName);
+    @Nested
+    class GetIndividualTranscriptFiles {
 
-        assertEquals("C:\\Users\\James\\OneDrive\\Documents\\folder\\chiblee videos\\transcripts-dlp\\" + fileName, transcriptsPath);
+        private List<File> transcriptFiles;
+
+        @BeforeEach
+        void setUp() {
+            transcriptFiles = transcriptTxtParsingService.getIndividualTranscriptFiles();
+        }
+
+        @AfterEach
+        void tearDown() {
+            transcriptFiles = null;
+        }
+
+        @Test
+        void areAnyTranscriptFileNamesEmpty() {
+            // Checks if every file name is not empty
+            assertTrue(transcriptFiles.stream().noneMatch(file -> file.getName().isEmpty()));
+        }
+
+        // This might fail either because:
+        // The transcripts aren't downloading properly
+        // Or we are in the middle of deleting/updating the transcripts - in which case do not worry
+        // that this test has failed
+        @Test
+        void areThereManyTranscriptFiles() {
+            // Checks if there are at least 650 transcript files
+            assertTrue(transcriptFiles.size() > 650);
+        }
+
     }
 
-    @Test
-    void getStopWords() {
-        List<String> stopWords = transcriptTxtParsingService.getStopWords();
+    @Nested
+    class GetTranscriptFromEachFile {
 
-        // Checks if every stop word is not empty
-        assertTrue(stopWords.stream().noneMatch(String::isEmpty));
-        assertTrue(stopWords.size() > 100);
-    }
+        private HashMap<String, LinkedHashMap<String, String>> transcriptMap;
 
-    @Test
-    void getIndividualTranscriptFiles() {
-        List<File> transcriptFiles = transcriptTxtParsingService.getIndividualTranscriptFiles();
+        @BeforeEach
+        void setUp() {
+            transcriptMap = transcriptTxtParsingService.getTranscriptFromEachFile();
+        }
 
-        // Checks if every file name is not empty
-        assertTrue(transcriptFiles.stream().noneMatch(file -> file.getName().isEmpty()));
-        assertTrue(transcriptFiles.size() > 650);
-    }
+        @AfterEach
+        void tearDown() {
+            transcriptMap = null;
+        }
 
-    @Test
-    void getTranscriptFromEachFile() {
-        HashMap<String, LinkedHashMap<String, String>> map = transcriptTxtParsingService.getTranscriptFromEachFile();
+        @Test
+        void areTranscriptTxtTitlesNotEmpty() {
+            // Checks if every title is not empty
+            assertTrue(transcriptMap.keySet().stream()
+                    .noneMatch(titleAndId -> titleAndId.substring(0, titleAndId.length() - 14)
+                            .isEmpty()));
+        }
 
-        // Checks if every title is not empty
-        assertTrue(map.keySet().stream()
-                .noneMatch(titleAndId -> titleAndId.substring(0, titleAndId.length() - 14)
-                        .isEmpty()));
+        @Test
+        void areTranscriptTxtIdsValid() {
+            // Checks if every id is valid
+            assertTrue(transcriptMap.keySet().stream()
+                    .allMatch(titleAndId -> titleAndId.substring(titleAndId.length() - 13)
+                            .matches("(\\[[^\"&?/\\s]{11}])")));
+        }
 
-        // Checks if every id is valid
-        assertTrue(map.keySet().stream()
-                .allMatch(titleAndId -> titleAndId.substring(titleAndId.length() - 13)
-                        .matches("(\\[[^\"&?/\\s]{11}])")));
+        @Test
+        void areTranscriptTxtTimestampsValid() {
+            // Checks if every timestamp is valid
+            assertTrue(transcriptMap.values().stream()
+                    .allMatch(linkedMap -> linkedMap.keySet().stream()
+                            .allMatch(timestamp -> timestamp.matches("[\\d{2}:]{8}.\\d{3}"))));
+        }
 
-        // Checks if every timestamp is valid
-        assertTrue(map.values().stream()
-                .allMatch(linkedMap -> linkedMap.keySet().stream()
-                        .allMatch(timestamp -> timestamp.matches("[\\d{2}:]{8}.\\d{3}"))));
+        @Test
+        void areTranscriptTxtLinesNotEmpty() {
+            // Checks if every line of text is not empty
+            assertTrue(transcriptMap.values().stream()
+                    .allMatch(linkedMap -> linkedMap.values().stream()
+                            .noneMatch(String::isEmpty)));
+        }
 
-        // Checks if every line of text is not empty
-        assertTrue(map.values().stream()
-                .allMatch(linkedMap -> linkedMap.values().stream()
-                        .noneMatch(String::isEmpty)));
     }
 }

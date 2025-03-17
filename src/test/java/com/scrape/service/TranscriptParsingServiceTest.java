@@ -4,19 +4,17 @@ import com.scrape.dto.TranscriptDto;
 import com.scrape.exception.InvalidIdException;
 import com.scrape.exception.InvalidTitleException;
 import com.scrape.exception.InvalidWordCountException;
-import com.scrape.exception.PrivateException;
 import com.scrape.model.Transcript;
 import com.scrape.repository.TranscriptRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -37,66 +35,80 @@ class TranscriptParsingServiceTest {
     @Mock
     private TranscriptRepository transcriptRepository;
 
-    @BeforeEach
-    void setUp() {
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
-
     @Nested
     class PhraseContext {
 
-        @Test
-        void givenPhraseContext_whenValidInput_thenReceiveContext() {
-            LinkedHashMap<String, List<Integer>> map = new LinkedHashMap<>();
-            String firstId = "2354335";
-            String secondId = "1235423";
-            String thirdId = "2346787";
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_PhraseContextValid.csv",
+                numLinesToSkip = 1)
+        void givenPhraseContext_whenValidInput_thenReceiveContext(String firstId, String secondId, String thirdId,
+                                                                  int timestamp1, int timestamp2, int timestamp3,
+                                                                  int surroundingContextTimestamp1,
+                                                                  String surroundingContextText1,
+                                                                  int surroundingContextTimestamp2,
+                                                                  String surroundingContextText2,
+                                                                  int surroundingContextTimestamp3,
+                                                                  String surroundingContextText3, int wordCount) {
+            LinkedHashMap<String, List<Integer>> idAndTimestamps = new LinkedHashMap<>();
 
-            map.put(firstId, List.of(1, 10, 20));
-            map.put(secondId, List.of(1, 10, 20));
-            map.put(thirdId, List.of(1, 10, 20));
+            idAndTimestamps.put(firstId, List.of(timestamp1, timestamp2, timestamp3));
+            idAndTimestamps.put(secondId, List.of(timestamp1, timestamp2, timestamp3));
+            idAndTimestamps.put(thirdId, List.of(timestamp1, timestamp2, timestamp3));
 
-            LinkedHashMap<Integer, String> timestampsText = new LinkedHashMap<>();
-            timestampsText.put(12, "through the veins oh how the");
-            timestampsText.put(16, "back up to their brains to form");
-            timestampsText.put(21, "expressions on their tstudpdif aces");
+            // This is for simulating the surrounding context
+            LinkedHashMap<Integer, String> timestampsAndText = new LinkedHashMap<>();
+            timestampsAndText.put(surroundingContextTimestamp1, surroundingContextText1);
+            timestampsAndText.put(surroundingContextTimestamp2, surroundingContextText2);
+            timestampsAndText.put(surroundingContextTimestamp3, surroundingContextText3);
 
-            when(transcriptService.makeMapOfTimestampsAndText(any())).thenReturn(timestampsText);
+            when(transcriptService.makeMapOfTimestampsAndText(any())).thenReturn(timestampsAndText);
 
-            List<String> textContext = transcriptParsingService.getPhraseContext(map, 30);
-
-            assertThat(textContext.toString()).contains("through the veins oh how the back up to their brains to form expressions on their tstudpdif aces");
+            List<String> textContext = transcriptParsingService.getPhraseContext(idAndTimestamps, wordCount);
+            assertThat(textContext.toString()).contains(
+                    surroundingContextText1 + " " + surroundingContextText2 + " " + surroundingContextText3);
         }
 
         @Test
-        void givenPhraseContext_whenEnteringWordCountLessThan0_thenThrowException() {
+        void givenPhraseContext_whenEnteringWordCountEqualTo0_thenThrowException() {
             LinkedHashMap<String, List<Integer>> map = new LinkedHashMap<>();
 
-            assertThrows(InvalidWordCountException.class, () -> transcriptParsingService.getPhraseContext(map, 0));
+            assertThrows(InvalidWordCountException.class, () ->
+                    transcriptParsingService.getPhraseContext(map, 0));
         }
 
-        @Test
-        void givenPhraseContext_whenEnteringWordCountGreaterThan100_thenThrowException() {
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_PhraseContextInvalid.csv",
+                numLinesToSkip = 1)
+        void givenPhraseContext_whenEnteringWordCountLessThan0_thenThrowException(int lessThan0) {
             LinkedHashMap<String, List<Integer>> map = new LinkedHashMap<>();
 
-            assertThrows(InvalidWordCountException.class, () -> transcriptParsingService.getPhraseContext(map, 120));
+            assertThrows(InvalidWordCountException.class, () ->
+                    transcriptParsingService.getPhraseContext(map, lessThan0));
+        }
+
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_PhraseContextInvalid.csv",
+                numLinesToSkip = 1)
+        void givenPhraseContext_whenEnteringWordCountGreaterThan100_thenThrowException(int lessThan0,
+                                                                                       int greaterThan100) {
+            LinkedHashMap<String, List<Integer>> map = new LinkedHashMap<>();
+
+            assertThrows(InvalidWordCountException.class, () ->
+                    transcriptParsingService.getPhraseContext(map, greaterThan100));
         }
     }
 
     @Nested
     class TranscriptByTitle {
 
-        @Test
-        void givenTranscriptTitle_whenEnteringUniqueTitle_thenReturnDto() {
-            String title = " new video yall";
-            String videoId = "23423";
-
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_TranscriptValid.csv",
+                numLinesToSkip = 1)
+        void givenTranscriptTitle_whenEnteringUniqueTitle_thenReturnDto(String title, String videoId, int timestamp1,
+                                                                        String text1, int timestamp2, String text2) {
             LinkedHashMap<Integer, String> map = new LinkedHashMap<>();
-            map.put(3543, "we wont make it home");
-            map.put(112, "desolation yes hesitation no");
+            map.put(timestamp1, text1);
+            map.put(timestamp2, text2);
             TranscriptDto transcriptDto = new TranscriptDto(videoId, map);
 
             when(transcriptService.getByTitle(title)).thenReturn(List.of(new Transcript()));
@@ -115,21 +127,22 @@ class TranscriptParsingServiceTest {
             assertThrows(InvalidTitleException.class, () -> transcriptParsingService.getTranscriptIdTimestampsAndTextByTitle(""));
         }
 
-        @Test
-        void givenTranscriptTitle_whenEnteringTooLongTitle_thenThrowException() {
-            assertThrows(InvalidTitleException.class, () -> transcriptParsingService.getTranscriptIdTimestampsAndTextByTitle(
-                    "age of innocence. desolation no. age of innocence. desolation no. age of innocence. desolation no. age of innocence. desolation no. age of " +
-                            "innocence. desolation no. age of innocence. desolation no. age of innocence. desolation no. age of innocence. desolation no. "
-            ));
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_TranscriptInvalid.csv",
+                numLinesToSkip = 1)
+        void givenTranscriptTitle_whenEnteringTooLongTitle_thenThrowException(String title) {
+            assertThrows(InvalidTitleException.class, () -> transcriptParsingService
+                    .getTranscriptIdTimestampsAndTextByTitle(title));
         }
     }
 
     @Nested
     class TranscriptByVideoId {
 
-        @Test
-        void givenGetTranscriptByVideoId_whenEnteringVideoId_thenReturnDto() {
-            String videoId = "abcdefghijk";
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_TranscriptValid.csv",
+                numLinesToSkip = 1)
+        void givenGetTranscriptByVideoId_whenEnteringVideoId_thenReturnDto(String title, String videoId) {
             TranscriptDto transcriptDto = new TranscriptDto(videoId, new LinkedHashMap<>());
 
             when(transcriptService.makeMapOfTimestampsAndText(videoId)).thenReturn(transcriptDto.getTimestampsAndText());
@@ -140,9 +153,11 @@ class TranscriptParsingServiceTest {
             assertThat(reusltTranscriptDto.getTimestampsAndText()).isEqualTo(transcriptDto.getTimestampsAndText());
         }
 
-        @Test
-        void givenGetTranscriptByVideoId_whenEnteringInvalidVideoId_thenThrowException(){
-            assertThrows(InvalidIdException.class, () -> transcriptParsingService.getTranscriptIdTimestampsAndTextByVideoId("abc"));
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_TranscriptInvalid.csv",
+                numLinesToSkip = 1)
+        void givenGetTranscriptByVideoId_whenEnteringInvalidVideoId_thenThrowException(String title, String videoId){
+            assertThrows(InvalidIdException.class, () -> transcriptParsingService.getTranscriptIdTimestampsAndTextByVideoId(videoId));
         }
     }
 }

@@ -1,14 +1,13 @@
 package com.scrape.service;
 
 import com.scrape.exception.PrivateException;
-import com.scrape.model.InvertedIndex;
 import com.scrape.model.Transcript;
 import com.scrape.repository.TranscriptRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,24 +29,19 @@ class TranscriptServiceTest {
     @Mock
     private TranscriptRepository transcriptRepository;
 
-    private Transcript transcript;
-
-    @BeforeEach
-    void setUp() {
-        transcript = new Transcript("23674", "plays knightfall", "00:12:34andtodaywewentforawalk#hg01:14:34truetranssoulrebel#hg");
-    }
-
-    @AfterEach
-    void tearDown() {
-        transcript = null;
+    private String createTimestampsAndText(String timestamp1, String text1, String timestamp2, String text2) {
+        return timestamp1 + text1 + timestamp2 + text2;
     }
 
     @Nested
     class Save {
 
-        @Test
-        void givenTranscript_whenSavingWithValidDetails_thenSave() {
-            transcript = new Transcript("videoid", "plays knightfall", "00:12:34andtodaywewentforawalk#hg01:14:34truetranssoulrebel#hg");
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+        void givenTranscript_whenSavingWithValidDetails_thenSave(String videoId, String title, String timestamp1,
+                                                                 String text1, String timestamp2, String text2) {
+            String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+            Transcript transcript = new Transcript(videoId, title, timestampsAndText);
 
             transcriptService.save(transcript);
 
@@ -60,30 +54,44 @@ class TranscriptServiceTest {
             assertThat(captor.getValue().getTimestampsAndText()).isEqualTo(transcript.getTimestampsAndText());
         }
 
-        @Test
-        void givenTranscript_whenSavingWithVideoIdEmpty_thenThrowPrivateException() {
-            transcript = new Transcript("", "plays knightfall", "00:12:34andtodaywewentforawalk#hg01:14:34truetranssoulrebel#hg");
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+        void givenTranscript_whenSavingWithVideoIdEmpty_thenThrowPrivateException(String videoId, String title,
+                                                                                  String timestamp1, String text1,
+                                                                                  String timestamp2, String text2) {
+            String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+            Transcript transcript = new Transcript("", title, timestampsAndText);
 
             assertThrows(PrivateException.class, () -> transcriptService.save(transcript));
         }
 
-        @Test
-        void givenTranscript_whenSavingWithTitleEmpty_thenThrowPrivateException() {
-            transcript = new Transcript("763551", "", "00:12:34andtodaywewentforawalk#hg01:14:34truetranssoulrebel#hg");
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+        void givenTranscript_whenSavingWithTitleEmpty_thenThrowPrivateException(String videoId, String title,
+                                                                                String timestamp1, String text1,
+                                                                                String timestamp2, String text2) {
+            String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+            Transcript transcript = new Transcript(videoId, "", timestampsAndText);
 
             assertThrows(PrivateException.class, () -> transcriptService.save(transcript));
         }
 
-        @Test
-        void givenTranscript_whenSavingWithTimestampsAndTextEmpty_thenThrowPrivateException() {
-            transcript = new Transcript("763551", "plays a game only once!!", "");
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+        void givenTranscript_whenSavingWithTimestampsAndTextEmpty_thenThrowPrivateException(String videoId,
+                                                                                            String title) {
+            Transcript transcript = new Transcript(videoId, title, "");
 
             assertThrows(PrivateException.class, () -> transcriptService.save(transcript));
         }
     }
 
-    @Test
-    void getByVideoId() {
+    @ParameterizedTest
+    @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+    void getByVideoId(String videoId, String title, String timestamp1, String text1, String timestamp2, String text2) {
+        String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+        Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+
         when(transcriptRepository.getTranscriptByVideoId(transcript.getVideoId())).thenReturn(transcript);
         Transcript resultTranscript = transcriptService.getByVideoId(transcript.getVideoId());
 
@@ -91,8 +99,12 @@ class TranscriptServiceTest {
         verify(transcriptRepository, times(1)).getTranscriptByVideoId(transcript.getVideoId());
     }
 
-    @Test
-    void getByTitle() {
+    @ParameterizedTest
+    @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+    void getByTitle(String videoId, String title, String timestamp1, String text1, String timestamp2, String text2) {
+        String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+        Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+
         when(transcriptRepository.getTranscriptsByTitle(transcript.getTitle())).thenReturn(List.of(transcript));
         List<Transcript> resultTranscripts = transcriptService.getByTitle(transcript.getTitle());
 
@@ -101,8 +113,13 @@ class TranscriptServiceTest {
         verify(transcriptRepository, times(1)).getTranscriptsByTitle(transcript.getTitle());
     }
 
-    @Test
-    void getVideoIdByTitle() {
+    @ParameterizedTest
+    @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+    void getVideoIdByTitle(String videoId, String title, String timestamp1, String text1, String timestamp2,
+                           String text2) {
+        String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+        Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+
         when(transcriptRepository.getTranscriptsByTitle(transcript.getTitle())).thenReturn(List.of(transcript));
         String resultVideoId = transcriptService.getVideoIdByTitle(transcript.getTitle());
 
@@ -110,14 +127,25 @@ class TranscriptServiceTest {
         verify(transcriptRepository, times(1)).getTranscriptsByTitle(transcript.getTitle());
     }
 
-    @Test
-    void makeMapOfTimestampsAndText() {
+    @ParameterizedTest
+    @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+    void makeMapOfTimestampsAndText(String videoId, String title, String timestamp1, String text1, String timestamp2,
+                                    String text2, String timestampInSeconds1, String timestampInSeconds2) {
+        String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+        Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+
         when(transcriptRepository.getTranscriptByVideoId(transcript.getVideoId())).thenReturn(transcript);
         transcriptRepository.save(transcript);
 
-        LinkedHashMap<Integer, String> resultMapOfTimestampsAndText = transcriptService.makeMapOfTimestampsAndText(transcript.getVideoId());
+        LinkedHashMap<Integer, String> resultMapOfTimestampsAndText =
+                transcriptService.makeMapOfTimestampsAndText(transcript.getVideoId());
 
-        assertThat(resultMapOfTimestampsAndText + "").isEqualTo("{754=odaywewentforawalk, 4474=transsoulrebel}");
+        // Removing the ending of #hg from the text
+        text1 = text1.substring(0, text1.length() - 3);
+        text2 = text2.substring(0, text2.length() - 3);
+
+        assertThat(resultMapOfTimestampsAndText + "").isEqualTo(
+                "{" + timestampInSeconds1 + "=" + text1 + ", " + timestampInSeconds2 + "=" + text2 + "}");
     }
 
     @Test

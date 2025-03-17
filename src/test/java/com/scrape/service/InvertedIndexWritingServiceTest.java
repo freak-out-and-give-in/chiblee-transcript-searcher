@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,10 +41,6 @@ class InvertedIndexWritingServiceTest {
         when(transcriptTxtParsingService.getStopWords()).thenReturn(List.of("the", "a", "to", "and"));
     }
 
-    @AfterEach
-    void tearDown() {
-    }
-
     @Test
     void writeInvertedIndexesToDatabase() {
         invertedIndexWritingService.writeInvertedIndexesToDatabase();
@@ -54,9 +51,13 @@ class InvertedIndexWritingServiceTest {
 
     @Test
     void buildInvertedIndex() {
+        // TitleAndId, Timestamp, List(Text)
         HashMap<String, HashMap<String, List<String>>> invertedIndex = invertedIndexWritingService.buildInvertedIndex();
 
-        System.out.println(invertedIndex);
+        HashMap<String, HashMap<String, List<String>>> invertedIndexTest = new HashMap<>();
+        invertedIndexTest.put("love", new HashMap<>(Map.of("tle [21340d]", List.of("134", "654"))));
+
+        System.out.println(invertedIndexTest);
 
         assertThat("{love={tle [21340d=[00:13:30, 02:55:34]}, wound={tle [21340d=[02:55:34]}, machina={tle [21340d=[04:14:52]}, stand={tle [21340d=[00:13:30]}," +
                 " inside={tle [21340d=[00:13:30]}, you={tle [21340d=[00:13:30]}}").isEqualTo(invertedIndex + "");
