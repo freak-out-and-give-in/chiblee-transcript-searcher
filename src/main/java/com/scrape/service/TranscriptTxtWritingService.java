@@ -1,14 +1,12 @@
 package com.scrape.service;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 
 @Service
 public class TranscriptTxtWritingService {
@@ -17,67 +15,73 @@ public class TranscriptTxtWritingService {
 
     private TranscriptTxtParsingService transcriptTxtParsingService;
 
+    private Base base;
+
     @Autowired
     public TranscriptTxtWritingService(TranscriptTxtParsingService transcriptTxtParsingService) {
         this.transcriptTxtParsingService = transcriptTxtParsingService;
+        base = new Base();
     }
 
     public void downloadTranscripts() {
         log.info("Downloading transcripts");
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
 
-        // Writing the transcripts should ALWAYS occur before updating the archive.
-        // A downside is that if this fails during execution for whatever reason,
-        // then the archive will not be accurate, and we'll have to start-a-new.
+        downloadTxtTranscripts();
 
-        writeTranscripts();
-        deleteAllFilesWithDotOrig();
-        populateOrUpdateArchive();
+        log.info("Finished downloading the transcripts, it took: {}", stopWatch);
     }
 
-    // Writes the transcripts to file
-    private void writeTranscripts() {
-        log.info("Writing transcript files");
+    public void deleteAllTranscripts() {
+        log.info("Deleting all transcripts...");
 
-        runCommandPrompt("yt-dlp \"https://www.youtube.com/@ChibleeVODs/videos\" --write-auto-sub --sub-lang \"en.*\" --skip-download --download-archive archive.txt");
-    }
-
-    // Populates or updates the archive.
-    // The archive stores which transcripts have been downloaded,
-    // so we don't have to download all transcripts every time
-    private void populateOrUpdateArchive() {
-        log.info("Populating or updating the transcript archive");
-
-        runCommandPrompt("yt-dlp --force-write-archive --simulate --flat-playlist --download-archive archive.txt \"https://www.youtube.com/@ChibleeVODs/videos\"");
-    }
-
-    // This only needs to be done immediately after downloading all the txt files using yt-dlp
-    // This is because there are duplicate downloads
-    private void deleteAllFilesWithDotOrig() {
-        log.info("Deleting all files ending in .orig ...");
-
-        int totalChecked = 0;
         int totalDeleted = 0;
 
         for (File fileEntry : transcriptTxtParsingService.getIndividualTranscriptFiles()) {
             String fileName = fileEntry.getName();
-            String ending = fileName.substring(fileName.length() - 7);
-            if (!ending.equals(".en.vtt")) {
-                // Deletes all files with .orig (seemingly duplicates)
-                deleteTranscriptFile(fileName);
-                totalDeleted++;
-            }
+            deleteTranscript(fileName);
 
-            totalChecked++;
+            totalDeleted++;
         }
 
-        log.info("Checked {} files and deleted {} of them that ended in .orig", totalChecked, totalDeleted);
+        log.info("Deleted {} transcripts", totalDeleted);
+    }
+
+    public void clearArchiveFiles() {
+        log.info("Clearing the archive...");
+
+        PrintWriter writer;
+        try {
+            writer = new PrintWriter(base.getArchiveFile());
+            writer.print("");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        writer.close();
+
+        log.info("Successfully cleared the archive");
+    }
+
+    // Writes the txt transcripts to a folder
+    private void downloadTxtTranscripts() {
+        log.info("Downloading the txt transcripts");
+
+        // The -P with a directory tells the application where to store the txt transcript downloads
+        runCommandPrompt("yt-dlp --force-write-archive --download-archive " + base.getArchiveFileName() + " " +
+                "-P \"" + base.getTranscriptsPath() + "\" \"https://www.youtube.com/@ChibleeVODs/videos\" " +
+                "--write-auto-sub --sub-lang \"en\" --skip-download --sleep-requests 1.25 --sleep-interval 3");
     }
 
     private void runCommandPrompt(String command) {
-        log.info("Running the command in command prompt: {} ...", command);
+        log.info("Running the command in command prompt: {}", command);
+
+        // This path should be wherever yt-dlp.exe is stored
+        String ytDlpPath = base.getConfigPath();
 
         ProcessBuilder builder = new ProcessBuilder(
-                "cmd.exe", "/c", "cd \"C:\\Users\\James\\OneDrive\\Documents\\folder\\chiblee videos\\transcripts-tldr\" && " + command);
+                "cmd.exe", "/c", "cd \"" + ytDlpPath + "\" && " + command);
         builder.redirectErrorStream(true);
         Process process;
 
@@ -96,17 +100,21 @@ public class TranscriptTxtWritingService {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            if (line == null) { break; }
-            log.info("Cmd prompt: {}", line);
+
+            if (line == null) {
+                break;
+            }
+
+            log.info("Command prompt: {}", line);
         }
 
-        log.info("The command has finished.");
+        log.info("The command has finished");
     }
 
-    private void deleteTranscriptFile(String fileName) {
-        log.trace("Deleting the transcript {}", fileName);
+    private void deleteTranscript(String fileName) {
+        log.debug("Deleting the transcript {}", fileName);
 
-        File file = new File(transcriptTxtParsingService.getTranscriptPathWithFileName(fileName));
+        File file = new File(base.getTranscriptPathWithFileName(fileName));
         file.delete();
     }
 }

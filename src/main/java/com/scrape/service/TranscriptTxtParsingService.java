@@ -13,20 +13,17 @@ public class TranscriptTxtParsingService {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final String transcriptsPath = "C:\\Users\\James\\OneDrive\\Documents\\folder\\chiblee videos\\transcripts-dlp";
-
-    public String getTranscriptPathWithFileName(String fileName) {
-        return transcriptsPath + "\\" + fileName;
-    }
+    private Base base;
 
     @Autowired
     public TranscriptTxtParsingService() {
+        base = new Base();
     }
 
     public List<String> getStopWords() {
         List<String> listOfStopWords = new ArrayList<>();
 
-        try(BufferedReader br = new BufferedReader(new FileReader("src/main/java/com/scrape/util/stopwords.txt"))) {
+        try(BufferedReader br = new BufferedReader(new FileReader(base.getStopWordsPath()))) {
             String line = br.readLine();
 
             while (line != null) {
@@ -44,7 +41,7 @@ public class TranscriptTxtParsingService {
         log.debug("Getting every individual transcript file");
 
         List<File> fileList = new ArrayList<>();
-        File folder = new File(transcriptsPath);
+        File folder = new File(base.getTranscriptsPath());
 
         for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
             if (!fileEntry.isDirectory()) {
@@ -87,7 +84,7 @@ public class TranscriptTxtParsingService {
         titleAndId = convertDoubleSpacesToSingleSpace(titleAndId);
 
         LinkedHashMap<String, String> timestampsAndText = new LinkedHashMap<>();
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(getTranscriptPathWithFileName(fileNameWithTitleIdAndExtensions)))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(base.getTranscriptPathWithFileName(fileNameWithTitleIdAndExtensions)))) {
             String line;
             String arrow = " --> ";
             String timestamp = "";

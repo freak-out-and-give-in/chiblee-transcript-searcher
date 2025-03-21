@@ -1,0 +1,5 @@
+21/03/25
+- Change TranscriptTxtWritingService.updateArchive() so that the archive populates videos at the same time as downloading
+- Be able to add to the transcript database, instead of clearing and rewriting
+- Update TranscriptServiceTest() to add the new delete and validation methods
+- Be able to add to the inverted index database, instead of clearing and rewriting

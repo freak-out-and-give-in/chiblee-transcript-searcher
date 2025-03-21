@@ -2,27 +2,54 @@ html, body {
     font-family: Arial, Helvetica, sans-serif;
 
     height: 100%;
-}
-
-.page {
     display: grid;
     place-items: center;
+}
 
-    height: 100%;
-    background: black;
+.wrapper {
+    display: grid;
+    width: 70%;
+    border: 0.8rem solid black;
 
-    .center {
-        background: darkblue;
+    /* This background-color is the border color of the boxes */
+    background-color: #0B1215;
+    gap: 0.4rem;
 
-        width: ;
+    .box {
+        display: grid;
+        place-items: center;
+        text-align: center;
+        background-color: white;
 
-        button {
-            margin: 150px;
-            padding: 15px;
+        --padding-descr-btn: 1rem;
+
+        .description {
+            font-size: 1.5rem;
+            padding-top: var(--padding-descr-btn);
+
+            p {
+                margin: 0;
+            }
         }
 
-        button:hover {
-            background: grey;
+        form {
+            padding: var(--padding-descr-btn) 0;
+
+            button {
+                font-size: 1.4rem;
+                background-color: lightgrey;
+                border: 0;
+                border-radius: 2rem;
+                padding: 1rem;
+            }
+
+            button:hover {
+                background-color: darkgrey;
+            }
+
+            button:active {
+                background-color: grey;
+            }
         }
     }
 }

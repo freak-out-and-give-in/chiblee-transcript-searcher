@@ -31,6 +31,9 @@ class InvertedIndexParsingServiceTest {
     private InvertedIndexService invertedIndexService;
 
     @Mock
+    private InvertedIndexDtoService invertedIndexDtoService;
+
+    @Mock
     private InvertedIndexRepository invertedIndexRepository;
 
     @ParameterizedTest
@@ -67,7 +70,7 @@ class InvertedIndexParsingServiceTest {
                 timestampC4, timestampC5)));
         allTimestampsFromSpecificId.add(new ArrayList<>(Arrays.asList(timestampD1, timestampD2, timestampD3,
                 timestampD4, timestampD5)));
-        when(invertedIndexService.getInvertedIndexDtosTimestamps(any(), any())).thenReturn(allTimestampsFromSpecificId);
+        when(invertedIndexDtoService.getInvertedIndexDtosTimestamps(any(), any())).thenReturn(allTimestampsFromSpecificId);
 
         LinkedHashMap<String, List<Integer>> mapOfIdWithTimestampsInSeconds = invertedIndexParsingService
                 .findThisPhrase("%s %s %s %s".formatted(word1, word2, word3, word4));

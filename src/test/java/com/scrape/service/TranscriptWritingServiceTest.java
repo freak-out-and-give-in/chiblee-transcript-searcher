@@ -1,8 +1,5 @@
 package com.scrape.service;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -29,16 +26,16 @@ class TranscriptWritingServiceTest {
 
     @ParameterizedTest
     @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
-    void writeTranscriptsToDatabase(String title, String id) {
+    void addTranscriptsToDatabase(String title, String id) {
         HashMap<String, LinkedHashMap<String, String>> map = new HashMap<>();
         LinkedHashMap<String, String> linkedMap = new LinkedHashMap<>();
         map.put(title + " [" + id + "]", linkedMap);
 
         when(transcriptTxtParsingService.getTranscriptFromEachFile()).thenReturn(map);
 
-        transcriptWritingService.writeTranscriptsToDatabase();
+        transcriptWritingService.addTranscriptsToDatabase();
 
         verify(transcriptService, times(1)).deleteAll();
-        verify(transcriptService, times(1)).save(any());
+        verify(transcriptService, times(1)).addOrUpdate(any());
     }
 }

@@ -18,14 +18,40 @@
 </head>
 <body>
 
-<div class="page">
-    <div class="center">
+<div class="wrapper">
+    <div class="box dta">
+        <div class="description">
+            <p>This will delete the txt transcripts of the VODs to your computer.</p>
+            <p>It also clears the txt archive that stores which transcripts have been downloaded.</p>
+        </div>
+        <form></form>
+    </div>
+    <div class="box dt">
+        <div class="description">
+            <p>This will download the txt transcripts of the VODs to your computer.</p>
+            <p>It uses an archive to keep track of the transcripts that are already downloaded.</p>
+        </div>
+        <form></form>
+    </div>
+    <div class="box tdb">
+        <div class="description">
+            <p>This will create the transcript database, deleting any current data and write it from scratch.</p>
+        </div>
+        <form></form>
+    </div>
+    <div class="box iidb">
+        <div class="description">
+            <p>This will create the inverted index database, which deletes the current data and fills it with new data using the txt transcripts.</p>
+        </div>
+        <form></form>
+    </div>
+    <div class="box all">
+        <div class="description">
+            <p>This will download transcripts, create the transcript database and create the inverted index database in the correct order and with one click.</p>
+        </div>
         <form></form>
     </div>
 </div>
-
-<p>Delete all transcripts, transcript archive, transcript database, inverted index database</p>
-<p>Detailed description of actions</p>
 
 </body>
 </html>

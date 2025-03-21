@@ -6,9 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class TranscriptWritingService {
@@ -25,16 +23,31 @@ public class TranscriptWritingService {
         this.transcriptTxtParsingService = transcriptTxtParsingService;
     }
 
-    public void writeTranscriptsToDatabase() {
+    // This should only be used instead of adding to the database if there is thought to be a problem with the current
+    // data, and that it needs to be wiped.
+    // For example, if we change what the characters are that separate each line
+    public void addTranscriptsToDatabase() {
         log.info("Writing transcripts to the database...");
 
-        transcriptService.deleteAll();
         HashMap<String, LinkedHashMap<String, String>> transcripts = transcriptTxtParsingService.getTranscriptFromEachFile();
 
         int transcriptCount = 0;
         for (String titleAndId : transcripts.keySet()) {
             String title = titleAndId.substring(0, titleAndId.length() - 14);
-            String id = titleAndId.substring(titleAndId.length() - 12, titleAndId.length() - 1);
+            String videoId = titleAndId.substring(titleAndId.length() - 12, titleAndId.length() - 1);
+
+            // If a transcript with the same videoId already exists in the database
+            if (transcriptService.doesThisVideoIdExist(videoId)) {
+                Transcript transcript = transcriptService.getByVideoId(videoId);
+
+                // If the videoId exists and is the same but the title is different, then delete the current transcript,
+                // because then they have probably updated the video since
+                if (!transcript.getTitle().equals(title)) {
+                    transcriptService.deleteTranscript(transcript);
+                } else { // Else, if the videoId and title are the same, then do not add it as it is already stored
+                    continue;
+                }
+            }
 
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, String> transcript : transcripts.get(titleAndId).entrySet()) {
@@ -51,13 +64,13 @@ public class TranscriptWritingService {
             String timestampsAndText = sb.toString().trim();
             timestampsAndText = replaceMusicAndExplicitFromText(timestampsAndText);
 
-            Transcript transcript = new Transcript(id, title, timestampsAndText);
-            transcriptService.save(transcript);
+            Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+            transcriptService.addOrUpdate(transcript);
 
             transcriptCount++;
         }
 
-        log.info("Successfully wrote {} transcripts to the database", transcriptCount);
+        log.info("Successfully added {} transcripts to the database", transcriptCount);
     }
 
     // Same method used when writing to the inverted index.
@@ -68,4 +81,5 @@ public class TranscriptWritingService {
 
         return text;
     }
+
 }

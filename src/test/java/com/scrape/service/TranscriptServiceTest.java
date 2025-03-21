@@ -43,7 +43,7 @@ class TranscriptServiceTest {
             String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
             Transcript transcript = new Transcript(videoId, title, timestampsAndText);
 
-            transcriptService.save(transcript);
+            transcriptService.addOrUpdate(transcript);
 
             ArgumentCaptor<Transcript> captor = ArgumentCaptor.forClass(Transcript.class);
             verify(transcriptRepository).save(captor.capture());
@@ -62,7 +62,7 @@ class TranscriptServiceTest {
             String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
             Transcript transcript = new Transcript("", title, timestampsAndText);
 
-            assertThrows(PrivateException.class, () -> transcriptService.save(transcript));
+            assertThrows(PrivateException.class, () -> transcriptService.addOrUpdate(transcript));
         }
 
         @ParameterizedTest
@@ -73,7 +73,7 @@ class TranscriptServiceTest {
             String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
             Transcript transcript = new Transcript(videoId, "", timestampsAndText);
 
-            assertThrows(PrivateException.class, () -> transcriptService.save(transcript));
+            assertThrows(PrivateException.class, () -> transcriptService.addOrUpdate(transcript));
         }
 
         @ParameterizedTest
@@ -82,77 +82,131 @@ class TranscriptServiceTest {
                                                                                             String title) {
             Transcript transcript = new Transcript(videoId, title, "");
 
-            assertThrows(PrivateException.class, () -> transcriptService.save(transcript));
+            assertThrows(PrivateException.class, () -> transcriptService.addOrUpdate(transcript));
         }
     }
 
-    @ParameterizedTest
-    @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
-    void getByVideoId(String videoId, String title, String timestamp1, String text1, String timestamp2, String text2) {
-        String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
-        Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+    @Nested
+    class Get {
 
-        when(transcriptRepository.getTranscriptByVideoId(transcript.getVideoId())).thenReturn(transcript);
-        Transcript resultTranscript = transcriptService.getByVideoId(transcript.getVideoId());
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+        void getByVideoId(String videoId, String title, String timestamp1, String text1, String timestamp2, String text2) {
+            String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+            Transcript transcript = new Transcript(videoId, title, timestampsAndText);
 
-        assertThat(resultTranscript).isEqualTo(transcript);
-        verify(transcriptRepository, times(1)).getTranscriptByVideoId(transcript.getVideoId());
+            when(transcriptRepository.getTranscriptByVideoId(transcript.getVideoId())).thenReturn(transcript);
+            Transcript resultTranscript = transcriptService.getByVideoId(transcript.getVideoId());
+
+            assertThat(resultTranscript).isEqualTo(transcript);
+            verify(transcriptRepository, times(1)).getTranscriptByVideoId(transcript.getVideoId());
+        }
+
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+        void getByTitle(String videoId, String title, String timestamp1, String text1, String timestamp2, String text2) {
+            String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+            Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+
+            when(transcriptRepository.getTranscriptsByTitle(transcript.getTitle())).thenReturn(List.of(transcript));
+            List<Transcript> resultTranscripts = transcriptService.getByTitle(transcript.getTitle());
+
+            assertThat(resultTranscripts.size()).isEqualTo(1);
+            assertThat(resultTranscripts.getFirst()).isEqualTo(transcript);
+            verify(transcriptRepository, times(1)).getTranscriptsByTitle(transcript.getTitle());
+        }
+
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+        void getVideoIdByTitle(String videoId, String title, String timestamp1, String text1, String timestamp2,
+                               String text2) {
+            String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+            Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+
+            when(transcriptRepository.getTranscriptsByTitle(transcript.getTitle())).thenReturn(List.of(transcript));
+            String resultVideoId = transcriptService.getVideoIdByTitle(transcript.getTitle());
+
+            assertThat(resultVideoId).isEqualTo(transcript.getVideoId());
+            verify(transcriptRepository, times(1)).getTranscriptsByTitle(transcript.getTitle());
+        }
+
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+        void makeMapOfTimestampsAndText(String videoId, String title, String timestamp1, String text1, String timestamp2,
+                                        String text2, String timestampInSeconds1, String timestampInSeconds2) {
+            String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+            Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+
+            transcriptRepository.save(transcript);
+            when(transcriptRepository.getTranscriptByVideoId(transcript.getVideoId())).thenReturn(transcript);
+
+            LinkedHashMap<Integer, String> resultMapOfTimestampsAndText =
+                    transcriptService.makeMapOfTimestampsAndText(transcript.getVideoId());
+
+            // Removing the ending of #hg from the text
+            text1 = text1.substring(0, text1.length() - 3);
+            text2 = text2.substring(0, text2.length() - 3);
+
+            assertThat(resultMapOfTimestampsAndText + "").isEqualTo(
+                    "{" + timestampInSeconds1 + "=" + text1 + ", " + timestampInSeconds2 + "=" + text2 + "}");
+        }
     }
 
-    @ParameterizedTest
-    @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
-    void getByTitle(String videoId, String title, String timestamp1, String text1, String timestamp2, String text2) {
-        String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
-        Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+    @Nested
+    class Validation {
 
-        when(transcriptRepository.getTranscriptsByTitle(transcript.getTitle())).thenReturn(List.of(transcript));
-        List<Transcript> resultTranscripts = transcriptService.getByTitle(transcript.getTitle());
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+        void doesThisVideoIdExist_positive(String videoId, String title, String timestamp1, String text1, String timestamp2,
+                                           String text2) {
+            String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+            Transcript transcript = new Transcript(videoId, title, timestampsAndText);
 
-        assertThat(resultTranscripts.size()).isEqualTo(1);
-        assertThat(resultTranscripts.getFirst()).isEqualTo(transcript);
-        verify(transcriptRepository, times(1)).getTranscriptsByTitle(transcript.getTitle());
+            transcriptRepository.save(transcript);
+            when(transcriptRepository.getTranscriptByVideoId(transcript.getVideoId())).thenReturn(transcript);
+
+            boolean result = transcriptService.doesThisVideoIdExist(transcript.getVideoId());
+
+            assertThat(result).isEqualTo(true);
+            verify(transcriptRepository, times(1)).getTranscriptByVideoId(transcript.getVideoId());
+        }
+
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+        void doesThisVideoIdExist_negative(String videoId, String title, String timestamp1, String text1, String timestamp2,
+                                           String text2) {
+            String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+            Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+
+            boolean result = transcriptService.doesThisVideoIdExist(transcript.getVideoId());
+
+            assertThat(result).isEqualTo(false);
+            verify(transcriptRepository, times(1)).getTranscriptByVideoId(transcript.getVideoId());
+        }
     }
 
-    @ParameterizedTest
-    @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
-    void getVideoIdByTitle(String videoId, String title, String timestamp1, String text1, String timestamp2,
-                           String text2) {
-        String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
-        Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+    @Nested
+    class Delete {
 
-        when(transcriptRepository.getTranscriptsByTitle(transcript.getTitle())).thenReturn(List.of(transcript));
-        String resultVideoId = transcriptService.getVideoIdByTitle(transcript.getTitle());
+        @ParameterizedTest
+        @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+        void deleteTranscript(String videoId, String title, String timestamp1, String text1, String timestamp2,
+                              String text2) {
+            String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
+            Transcript transcript = new Transcript(videoId, title, timestampsAndText);
 
-        assertThat(resultVideoId).isEqualTo(transcript.getVideoId());
-        verify(transcriptRepository, times(1)).getTranscriptsByTitle(transcript.getTitle());
-    }
+            transcriptService.deleteTranscript(transcript);
 
-    @ParameterizedTest
-    @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
-    void makeMapOfTimestampsAndText(String videoId, String title, String timestamp1, String text1, String timestamp2,
-                                    String text2, String timestampInSeconds1, String timestampInSeconds2) {
-        String timestampsAndText = createTimestampsAndText(timestamp1, text1, timestamp2, text2);
-        Transcript transcript = new Transcript(videoId, title, timestampsAndText);
+            verify(transcriptRepository, times(1)).delete(transcript);
+            verify(transcriptRepository, times(1)).flush();
+        }
 
-        when(transcriptRepository.getTranscriptByVideoId(transcript.getVideoId())).thenReturn(transcript);
-        transcriptRepository.save(transcript);
+        @Test
+        void deleteAll() {
+            transcriptService.deleteAll();
 
-        LinkedHashMap<Integer, String> resultMapOfTimestampsAndText =
-                transcriptService.makeMapOfTimestampsAndText(transcript.getVideoId());
-
-        // Removing the ending of #hg from the text
-        text1 = text1.substring(0, text1.length() - 3);
-        text2 = text2.substring(0, text2.length() - 3);
-
-        assertThat(resultMapOfTimestampsAndText + "").isEqualTo(
-                "{" + timestampInSeconds1 + "=" + text1 + ", " + timestampInSeconds2 + "=" + text2 + "}");
-    }
-
-    @Test
-    void deleteAll() {
-        transcriptService.deleteAll();
-
-        verify(transcriptRepository, times(1)).deleteAll();
-        verify(transcriptRepository, times(1)).flush();
+            verify(transcriptRepository, times(1)).deleteAll();
+            verify(transcriptRepository, times(1)).flush();
+        }
     }
 }

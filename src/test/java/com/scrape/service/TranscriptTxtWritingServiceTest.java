@@ -10,8 +10,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.File;
+import java.io.*;
 import java.util.HashMap;
+import java.util.Objects;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class TranscriptTxtWritingServiceTest {
@@ -22,10 +25,18 @@ class TranscriptTxtWritingServiceTest {
     @Mock
     private TranscriptTxtParsingService transcriptTxtParsingService;
 
+    private Base base;
+
     private HashMap<String, File> fileNameWithFile;
+
+    @BeforeEach
+    void setUp() {
+        base = new Base();
+    }
 
     @AfterEach
     void tearDown() {
+        base = null;
         fileNameWithFile = null;
     }
 
@@ -51,5 +62,53 @@ class TranscriptTxtWritingServiceTest {
 
         transcriptTxtWritingService.downloadTranscripts();
          */
+    }
+
+    @ParameterizedTest
+    @CsvFileSource(resources = "/csv/service/transcript-txt-writing-service/TranscriptTxtWritingServiceData.csv", numLinesToSkip = 1)
+    void deleteAllTranscripts(String fileName1, String pathName1, String fileName2, String pathName2, String fileName3, String pathName3) {
+        setUpCreateFileNameWithFileHashMap(fileName1, pathName1, fileName2, pathName2, fileName3, pathName3);
+        // creates a folder and puts in 2 text files with text in them.
+        // use the deleteAllTranscripts() method on the folder,
+        // and verify that the resulting amount of txt files is 0
+    }
+
+    @ParameterizedTest
+    @CsvFileSource(resources = "/csv/service/transcript-txt-writing-service/TranscriptTxtWritingServiceData.csv", numLinesToSkip = 1)
+    void clearArchiveFiles(String fileName1, String pathName1, String fileName2, String pathName2, String fileName3, String pathName3) {
+        setUpCreateFileNameWithFileHashMap(fileName1, pathName1, fileName2, pathName2, fileName3, pathName3);
+        // creates a txt file with information inside it.
+        // use clearArchiveFiles() method on the file,
+        // and verify that there is then no text inside
+    }
+
+    @Test
+    void areThereTheSameAmountOfTxtTranscriptsAsIdsInArchive() {
+        int amountOfTxtTranscripts = calculateAmountOfTxtTranscripts();
+        int amountOfArchiveIds = calculateAmountOfArchiveIds();
+
+        assertEquals(amountOfTxtTranscripts, amountOfArchiveIds);
+    }
+
+    private int calculateAmountOfTxtTranscripts() {
+        File transcriptFolder = new File(base.getTranscriptsPath());
+        return Objects.requireNonNull(transcriptFolder.list()).length;
+    }
+
+    private int calculateAmountOfArchiveIds() {
+        int lines = 0;
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(base.getArchiveFile()));
+            while (reader.readLine() != null) {
+                lines++;
+            }
+
+            reader.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return lines;
     }
 }

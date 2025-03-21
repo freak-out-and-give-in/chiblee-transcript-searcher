@@ -24,10 +24,22 @@ class TranscriptTxtParsingServiceTest {
     @InjectMocks
     private TranscriptTxtParsingService transcriptTxtParsingService;
 
+    private Base base;
+
+    @BeforeEach
+    void setUp() {
+        base = new Base();
+    }
+
+    @AfterEach
+    void tearDown() {
+        base = null;
+    }
+
     @ParameterizedTest
     @CsvFileSource(resources = "/csv/service/transcript-txt-parsing-service/TranscriptTxtParsingServiceData.csv", numLinesToSkip = 1)
     void getTranscriptPathWithFileName(String fileName, String expectedTranscriptPath) {
-        String actualTranscriptPath = transcriptTxtParsingService.getTranscriptPathWithFileName(fileName);
+        String actualTranscriptPath = base.getTranscriptPathWithFileName(fileName);
 
         assertEquals(expectedTranscriptPath + fileName, actualTranscriptPath);
     }

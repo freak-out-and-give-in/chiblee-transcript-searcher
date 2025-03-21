@@ -17,12 +17,15 @@ public class InvertedIndexParsingService {
 
     private InvertedIndexService invertedIndexService;
 
-    private BaseMethods baseMethods;
+    private InvertedIndexDtoService invertedIndexDtoService;
+
+    private Base base;
 
     @Autowired
-    public InvertedIndexParsingService(InvertedIndexService invertedIndexService) {
+    public InvertedIndexParsingService(InvertedIndexService invertedIndexService, InvertedIndexDtoService invertedIndexDtoService) {
         this.invertedIndexService = invertedIndexService;
-        baseMethods = new BaseMethods();
+        this.invertedIndexDtoService = invertedIndexDtoService;
+        base = new Base();
     }
 
     public LinkedHashMap<String, List<Integer>> findThisPhrase(String phrase) {
@@ -58,61 +61,11 @@ public class InvertedIndexParsingService {
         String[] arrayOfWords = phrase.toLowerCase().trim().split(" ");
         List<String> listOfWordsNotRemoved = new ArrayList<>(Arrays.asList(arrayOfWords));
 
-        List<InvertedIndexDto> listOfInvertedIndexDtos = convertToInvertedIndexDtos(listOfWordsNotRemoved, arrayOfWords, phrase);
-        List<InvertedIndexDto> commonIdsWithTimestamps = getCommonIdsWithTimestamps(listOfInvertedIndexDtos);
+        List<InvertedIndexDto> listOfInvertedIndexDtos = invertedIndexDtoService.convertToInvertedIndexDtos(listOfWordsNotRemoved, arrayOfWords, phrase);
+        List<InvertedIndexDto> commonIdsWithTimestamps = invertedIndexDtoService.getCommonIdsWithTimestamps(listOfInvertedIndexDtos);
         LinkedHashMap<String, List<String>> idsAndTimestamps = filterInvertedIndexForCloseTimestamps(commonIdsWithTimestamps);
 
         return convertTimestampsToSecondsAsMap(idsAndTimestamps);
-    }
-
-    private List<InvertedIndexDto> convertToInvertedIndexDtos(List<String> listOfWordsNotRemoved, String[] arrayOfWords, String phrase) {
-        log.debug("Converting inverted indexes into a map");
-
-        // term, (id(0), timestamps(1+))
-        List<InvertedIndexDto> listOfInvertedIndexDtos = new ArrayList<>();
-        for (String tempWord : arrayOfWords) {
-            InvertedIndex invertedIndex = invertedIndexService.getInvertedIndex(tempWord);
-
-            // Word cannot be found (might be a StopWord)
-            if (invertedIndex == null) {
-                listOfWordsNotRemoved.remove(tempWord);
-                continue;
-            }
-
-            InvertedIndexDto invertedIndexDto = new InvertedIndexDto(tempWord, convertInvertedIndexStringsToMap(invertedIndex.getVideoIdWithTimestamps()));
-            listOfInvertedIndexDtos.add(invertedIndexDto);
-        }
-
-        if (listOfInvertedIndexDtos.isEmpty()) {
-            throw new InvalidPhraseException("The phrase " + phrase + " does not contain any words that are in our database");
-        }
-
-        return listOfInvertedIndexDtos;
-    }
-
-    // Converts a HashMap.toString() to a list
-    // e.g. {s0sKAjaPHu8=[03:52:31.040], p4oGmEGaAew=[03:00:11.680, 03:14:02.399, 03:14:05.200], ebM8fywbYbQ=[00:22:06.059]}
-    private LinkedHashMap<String, List<String>> convertInvertedIndexStringsToMap(String invertedIndexString) {
-        LinkedHashMap<String, List<String>> mapOfIdWithTimestamps = new LinkedHashMap<>();
-
-        // Removes start & end squiggly brackets
-        invertedIndexString = invertedIndexString.substring(1, invertedIndexString.length() - 1);
-        List<String> listOfInvertedIndexString = List.of(invertedIndexString.split("], "));
-
-        for (String tempInvertedIndex : listOfInvertedIndexString) {
-            // Adding on the ending square bracket that's removed by split
-            tempInvertedIndex += "]";
-            String id = tempInvertedIndex.substring(0, 11);
-            String timestamps = tempInvertedIndex.substring(13, tempInvertedIndex.length() - 1);
-
-            List<String> listOfTimestamps = List.of(timestamps.split(", "));
-            mapOfIdWithTimestamps.put(id, listOfTimestamps);
-        }
-
-
-        log.debug("Converted the string {}, to a map: {}", invertedIndexString, mapOfIdWithTimestamps);
-
-        return mapOfIdWithTimestamps;
     }
 
     private LinkedHashMap<String, List<String>> filterInvertedIndexForCloseTimestamps(List<InvertedIndexDto> listOfInvertedIndexDtos) {
@@ -125,7 +78,8 @@ public class InvertedIndexParsingService {
         // Loops over the ids (every word has the same ids due to previous processing)
         for (String currentId : listOfIds) {
             List<String> firstTimestamps = firstInvertedIndexDto.getMapOfIdWithTimestamps().get(currentId);
-            List<List<String>> allTimestampsFromSpecificId = new ArrayList<>(invertedIndexService.getInvertedIndexDtosTimestamps(listOfInvertedIndexDtos, currentId));
+            List<List<String>> allTimestampsFromSpecificId = new ArrayList<>(invertedIndexDtoService
+                    .getInvertedIndexDtosTimestamps(listOfInvertedIndexDtos, currentId));
 
             // Loops over first II object.get(id)
             for (String firstTimestamp : firstTimestamps) {
@@ -225,55 +179,6 @@ public class InvertedIndexParsingService {
         return Integer.parseInt(timestamp.replace(":", ""));
     }
 
-    private List<InvertedIndexDto> getCommonIdsWithTimestamps(List<InvertedIndexDto> listOfInvertedIndexDtos) {
-        log.debug("Finding the common ids with their timestamps");
-
-        List<String> commonIds = getCommonIds(listOfInvertedIndexDtos);
-        List<InvertedIndexDto> newListOfInvertedIndexDtos = new ArrayList<>();
-
-        // Each map looped over represents a word
-        for (InvertedIndexDto invertedIndexDto : listOfInvertedIndexDtos) {
-            InvertedIndexDto newInvertedIndexDto = getInvertedIndexDtoWithCommonIds(invertedIndexDto, commonIds);
-            newListOfInvertedIndexDtos.add(newInvertedIndexDto);
-        }
-
-        return newListOfInvertedIndexDtos;
-    }
-
-    private InvertedIndexDto getInvertedIndexDtoWithCommonIds(InvertedIndexDto invertedIndexDto, List<String> commonIds) {
-        LinkedHashMap<String, List<String>> mapOfIdWithTimestamps = new LinkedHashMap<>();
-        for (Map.Entry<String, List<String>> map : invertedIndexDto.getMapOfIdWithTimestamps().entrySet()) {
-            String id = map.getKey();
-
-            // If the id is a common id
-            if (commonIds.contains(id)) {
-                List<String> timestamps = map.getValue();
-
-                mapOfIdWithTimestamps.put(id, timestamps);
-            }
-        }
-
-        return new InvertedIndexDto(invertedIndexDto.getTerm(), mapOfIdWithTimestamps);
-    }
-
-    private List<String> getCommonIds(List<InvertedIndexDto> listOfInvertedIndexDtos) {
-        List<List<String>> listOfListOfIds = new ArrayList<>();
-
-        // Fills the list-of ids with all ids
-        for (InvertedIndexDto invertedIndexDto : listOfInvertedIndexDtos) {
-            List<String> listOfIds = new ArrayList<>(invertedIndexDto.getMapOfIdWithTimestamps().keySet());
-            listOfListOfIds.add(listOfIds);
-        }
-
-        // Makes a list with only the ids that appear in every word
-        List<String> listOfCommonIds = listOfListOfIds.getFirst();
-        for (int i = 1; i < listOfListOfIds.size(); i++) {
-            listOfCommonIds.retainAll(listOfListOfIds.get(i));
-        }
-
-        return listOfCommonIds;
-    }
-
     private LinkedHashMap<String, List<Integer>> convertTimestampsToSecondsAsMap(LinkedHashMap<String, List<String>> idsAndTimestamps) {
         LinkedHashMap<String, List<Integer>> mapWithTimestampSeconds = new LinkedHashMap<>();
 
@@ -290,7 +195,7 @@ public class InvertedIndexParsingService {
         for (String idAndTimestamp : idsAndTimestamps) {
             String timestamp = idAndTimestamp.substring(0, 12);
 
-            listOfTimestamps.add(baseMethods.convertTimestampToSeconds(timestamp));
+            listOfTimestamps.add(base.convertTimestampToSeconds(timestamp));
         }
 
         return listOfTimestamps;

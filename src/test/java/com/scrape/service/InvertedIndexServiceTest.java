@@ -27,6 +27,9 @@ class InvertedIndexServiceTest {
     @InjectMocks
     private InvertedIndexService invertedIndexService;
 
+    @InjectMocks
+    private InvertedIndexDtoService invertedIndexDtoService;
+
     @Mock
     private InvertedIndexRepository invertedIndexRepository;
 
@@ -54,7 +57,7 @@ class InvertedIndexServiceTest {
         map2.put("id2", List.of("{[72: 77]", "[53: 67, 798, 8, 67, 99]"));
         InvertedIndexDto invertedIndexDto2 = new InvertedIndexDto("sin", map2);
 
-        List<List<String>> resultTimestamps = invertedIndexService.getInvertedIndexDtosTimestamps(List.of(invertedIndexDto1, invertedIndexDto2), "id2");
+        List<List<String>> resultTimestamps = invertedIndexDtoService.getInvertedIndexDtosTimestamps(List.of(invertedIndexDto1, invertedIndexDto2), "id2");
         List<List<String>> expectedTimestamps = new ArrayList<>();
         expectedTimestamps.add(List.of("{[72: 4353, 4531]", "[53: 67, 798, 8]"));
         expectedTimestamps.add(List.of("{[72: 77]", "[53: 67, 798, 8, 67, 99]"));

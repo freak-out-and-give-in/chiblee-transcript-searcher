@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,15 +22,15 @@ public class TranscriptService {
 
     private TranscriptRepository transcriptRepository;
 
-    private BaseMethods baseMethods;
+    private Base base;
 
     @Autowired
     public TranscriptService(TranscriptRepository transcriptRepository) {
         this.transcriptRepository = transcriptRepository;
-        baseMethods = new BaseMethods();
+        base = new Base();
     }
 
-    public void save(Transcript transcript) {
+    public void addOrUpdate(Transcript transcript) {
         if (transcript.getVideoId().isEmpty()) {
             throw new PrivateException("The transcript's video id should not be empty");
         }
@@ -82,10 +80,22 @@ public class TranscriptService {
 
         return Arrays.stream(getByVideoId(videoId).getTimestampsAndText()
                         .split("#hg"))
-                .collect(Collectors.toMap(text -> baseMethods.convertTimestampToSeconds(text.substring(0, 12)),
+                .collect(Collectors.toMap(text -> base.convertTimestampToSeconds(text.substring(0, 12)),
                         text -> text.substring(12),
                         // If there is a duplicate entry for a key, add the values together
                         (t1, t2) -> t1 + " " + t2, LinkedHashMap::new));
+    }
+
+    public boolean doesThisVideoIdExist(String videoId) {
+        Transcript transcript = transcriptRepository.getTranscriptByVideoId(videoId);
+        return transcript != null;
+    }
+
+    public void deleteTranscript(Transcript transcript) {
+        log.debug("Deleting the transcript with the title: {}, and id: {}", transcript.getTitle(), transcript.getId());
+
+        transcriptRepository.delete(transcript);
+        transcriptRepository.flush();
     }
 
     public void deleteAll() {

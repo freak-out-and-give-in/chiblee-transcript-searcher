@@ -4,16 +4,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
+import org.mockito.Mock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class BaseMethodsTest {
+class BaseTest {
 
-    private BaseMethods baseMethods;
+    @Mock
+    private Base base;
 
     @BeforeEach
     void setUp() {
-        baseMethods = new BaseMethods();
+        base = new Base();
     }
 
     @AfterEach
@@ -23,7 +25,7 @@ class BaseMethodsTest {
     @ParameterizedTest
     @CsvFileSource(resources = "/csv/service/base-methods/BaseMethodsData.csv", numLinesToSkip = 1)
     void convertTimestampToSeconds(String timestamp, int expectedTimestampInSeconds) {
-        int actualTimestampInSeconds = baseMethods.convertTimestampToSeconds(timestamp);
+        int actualTimestampInSeconds = base.convertTimestampToSeconds(timestamp);
 
         assertEquals(expectedTimestampInSeconds, actualTimestampInSeconds);
     }

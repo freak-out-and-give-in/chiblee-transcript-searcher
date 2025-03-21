@@ -1,5 +1,6 @@
 package com.scrape.service;
 
+import com.scrape.dto.InvertedIndexDto;
 import com.scrape.model.InvertedIndex;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.CoreDocument;
@@ -30,22 +31,35 @@ public class InvertedIndexWritingService {
         log.info("Writing inverted indexes to the database...");
         HashMap<String, HashMap<String, List<String>>> invertedIndex = buildInvertedIndex();
 
+        // Looping through each word
         int invertedIndexCount = 0;
         for (String word : invertedIndex.keySet()) {
             InvertedIndex tempInvertedIndex = new InvertedIndex(word, invertedIndex.get(word).toString());
-            invertedIndexService.save(tempInvertedIndex);
 
-            invertedIndexCount++;
+            // If the word is not in the database, then add it
+            if (invertedIndexService.getInvertedIndex(tempInvertedIndex.getTerm()) == null) {
+                invertedIndexService.save(tempInvertedIndex);
+            } else { // Else, the word is in the database already
+                InvertedIndex currentInvertedIndex = invertedIndexService.getInvertedIndex(tempInvertedIndex.getTerm());
+
+                // Finds the common and uncommon ids between the 2 inverted indexes
+                InvertedIndexDto newInvertedIndexDto = invertedIndexService.findAnyNewIdsAndTimestampsForThisTerm(tempInvertedIndex);
+
+                // If the updated inverted index dto has different data than the currently stored data
+                if (!newInvertedIndexDto.getMapOfIdWithTimestamps().toString().equals(tempInvertedIndex.getVideoIdWithTimestamps())) {
+                    // Save the new data to the repository
+                    currentInvertedIndex.setVideoIdWithTimestamps(newInvertedIndexDto.getMapOfIdWithTimestamps().toString());
+                    invertedIndexService.save(currentInvertedIndex);
+                }
+            }
         }
 
         log.info("Successfully wrote {} terms to the database", invertedIndexCount);
     }
 
     public HashMap<String, HashMap<String, List<String>>> buildInvertedIndex() {
-        invertedIndexService.deleteAll();
-
         log.info("Building the inverted index");
-        // TitleAndId, Timestamp, Text
+        // titleAndId, timestamp, text
         HashMap<String, LinkedHashMap<String, String>> transcripts = transcriptTxtParsingService.getTranscriptFromEachFile();
 
         return tokenizeRemoveStopWordsAndLemmatize(transcripts);
@@ -141,14 +155,8 @@ public class InvertedIndexWritingService {
     }
 
     private List<String> removeWordsWithTooFewCharacters(List<String> listOfWords) {
-        int wordCharacterLengthMinimum = 1;
-
-        Iterator<String> iterator = listOfWords.iterator();
-        while (iterator.hasNext()) {
-            if (iterator.next().length() <= wordCharacterLengthMinimum) {
-                iterator.remove();
-            }
-        }
+        int wordLengthMinimum = 1;
+        listOfWords.removeIf(s -> s.length() <= wordLengthMinimum);
 
         return listOfWords;
     }

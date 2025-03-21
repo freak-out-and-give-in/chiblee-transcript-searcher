@@ -41,38 +41,45 @@ public class AdminController {
         return new ModelAndView("/html/admin.html");
     }
 
-    @PostMapping("/admin/initDB")
-    public void initialiseDatabase() {
-        checkForAuthorization("initialising the inverted index database");
-        invertedIndexWritingService.writeInvertedIndexesToDatabase();
+    @PostMapping("/admin/deleteTxtTranscriptsAndArchive")
+    public void deleteTxtTranscriptsAndArchive() {
+        checkForAuthorization("deleting txt transcripts and archive");
+        transcriptTxtWritingService.deleteAllTranscripts();
+        transcriptTxtWritingService.clearArchiveFiles();
     }
 
-    // Only should be done after downloading transcripts with yt-dlp
-    @PostMapping("/admin/downloadTranscripts")
-    public void downloadTranscripts() {
-        checkForAuthorization("downloading transcripts");
+    // This should only be done after downloading transcripts with yt-dlp
+    @PostMapping("/admin/downloadTxtTranscripts")
+    public void downloadTxtTranscripts() {
+        checkForAuthorization("downloading txt transcripts");
         transcriptTxtWritingService.downloadTranscripts();
     }
 
-    @PostMapping("/admin/initTranscripts")
-    public void initialiseTranscripts() {
-        checkForAuthorization("initialising transcripts");
-        transcriptWritingService.writeTranscriptsToDatabase();
+    @PostMapping("/admin/createTranscriptDB")
+    public void createTranscriptDB() {
+        checkForAuthorization("creating transcript database");
+        transcriptWritingService.addTranscriptsToDatabase();
+    }
+
+    @PostMapping("/admin/createInvertedIndexDB")
+    public void createInvertedIndexDB() {
+        checkForAuthorization("creating the inverted index database");
+        invertedIndexWritingService.writeInvertedIndexesToDatabase();
     }
 
     @Transactional
-    @PostMapping("/admin/downloadAll")
-    public void downloadTranscriptsAndInitialiseDatabases() {
-        String attemptedActionInPresentTense = "downloading transcripts, initialising the transcripts database and " +
-                "initialising the inverted index database";
+    @PostMapping("/admin/downloadTranscriptsAndCreateDB")
+    public void downloadTranscriptsAndCreateDatabases() {
+        String attemptedActionInPresentTense = "downloading transcripts, creating the transcripts database and " +
+                "creating the inverted index database";
         checkForAuthorization(attemptedActionInPresentTense);
         log.info("Started: {}", attemptedActionInPresentTense);
 
-        downloadTranscripts();
-        initialiseTranscripts();
-        initialiseDatabase();
+        downloadTxtTranscripts();
+        createTranscriptDB();
+        createInvertedIndexDB();
 
-        log.info("Successfully: downloaded transcripts, initialised the transcripts database and initialised the " +
+        log.info("Successfully: downloaded transcripts, created the transcripts database and created the " +
                 "inverted index database");
     }
 
