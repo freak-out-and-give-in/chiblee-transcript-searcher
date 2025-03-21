@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Admin" type="Application" factoryName="Application">
+    <envs>
+      <env name="ADMIN-CODE" value="q4Ekfb+@nV7j&amp;G3F" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="com.scrape.TranscriptVideosApplication" />
+    <module name="Transcript" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

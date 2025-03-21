@@ -1,0 +1,28 @@
+------------------------------------------------------------------------------------------------------------
+CHANGE/ADD FEATURES TODO
+- Make sure all the DTO conversion logic is encapsulated in the InvertedIndexDtoService class, including in tests
+
+
+- Make webpages look nicer
+
+------------------------------------------------------------------------------------------------------------
+TESTING TODO
+- Write tests in TranscriptTxtWritingServiceTest
+- Fix/rewrite the controller tests
+- Add tests to the txt transcripts to check whether our parsing rules match
+- Update TranscriptWritingServiceTest() to reflect the db not always deleting everything first, gaining the ability
+to add transcripts to the current list
+
+- Update InvertedIndexWritingServiceTest() as downloading to the db now doesn't delete and can update the rows instead
+- Update InvertedIndexServiceTest() to add the new methods
+- Transfer DTO tests from InvertedIndexParsingServiceTest() to InvertedIndexDtoServiceTest()
+- Write tests for InvertedIndexDtoService()
+
+------------------------------------------------------------------------------------------------------------
+FIXED
+- Change TranscriptTxtWritingService.updateArchive() so that the archive populates videos at the same time as downloading
+- Be able to add to the transcript database, instead of clearing and rewriting
+- Update TranscriptServiceTest() to add the new delete and validation methods
+- Be able to add to the inverted index database, instead of clearing and rewriting
+
+------------------------------------------------------------------------------------------------------------
