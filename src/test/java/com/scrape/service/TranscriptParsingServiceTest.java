@@ -32,9 +32,6 @@ class TranscriptParsingServiceTest {
     @Mock
     private TranscriptService transcriptService;
 
-    @Mock
-    private TranscriptRepository transcriptRepository;
-
     @Nested
     class PhraseContext {
 
@@ -95,69 +92,6 @@ class TranscriptParsingServiceTest {
 
             assertThrows(InvalidWordCountException.class, () ->
                     transcriptParsingService.getPhraseContext(map, greaterThan100));
-        }
-    }
-
-    @Nested
-    class TranscriptByTitle {
-
-        @ParameterizedTest
-        @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_TranscriptValid.csv",
-                numLinesToSkip = 1)
-        void givenTranscriptTitle_whenEnteringUniqueTitle_thenReturnDto(String title, String videoId, int timestamp1,
-                                                                        String text1, int timestamp2, String text2) {
-            LinkedHashMap<Integer, String> map = new LinkedHashMap<>();
-            map.put(timestamp1, text1);
-            map.put(timestamp2, text2);
-            TranscriptDto transcriptDto = new TranscriptDto(videoId, map);
-
-            when(transcriptService.getByTitle(title)).thenReturn(List.of(new Transcript()));
-            when(transcriptService.getVideoIdByTitle(title)).thenReturn(videoId);
-            when(transcriptService.makeMapOfTimestampsAndText(videoId)).thenReturn(map);
-
-            TranscriptDto resultTranscriptDto = transcriptParsingService.getTranscriptIdTimestampsAndTextByTitle(title);
-
-            assertThat(resultTranscriptDto.getId()).isEqualTo(transcriptDto.getId());
-            assertThat(resultTranscriptDto.getTimestampsAndText()).isEqualTo(transcriptDto.getTimestampsAndText());
-
-        }
-
-        @Test
-        void givenTranscriptTitle_whenEnteringEmptyTitle_thenThrowException() {
-            assertThrows(InvalidTitleException.class, () -> transcriptParsingService.getTranscriptIdTimestampsAndTextByTitle(""));
-        }
-
-        @ParameterizedTest
-        @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_TranscriptInvalid.csv",
-                numLinesToSkip = 1)
-        void givenTranscriptTitle_whenEnteringTooLongTitle_thenThrowException(String title) {
-            assertThrows(InvalidTitleException.class, () -> transcriptParsingService
-                    .getTranscriptIdTimestampsAndTextByTitle(title));
-        }
-    }
-
-    @Nested
-    class TranscriptByVideoId {
-
-        @ParameterizedTest
-        @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_TranscriptValid.csv",
-                numLinesToSkip = 1)
-        void givenGetTranscriptByVideoId_whenEnteringVideoId_thenReturnDto(String title, String videoId) {
-            TranscriptDto transcriptDto = new TranscriptDto(videoId, new LinkedHashMap<>());
-
-            when(transcriptService.makeMapOfTimestampsAndText(videoId)).thenReturn(transcriptDto.getTimestampsAndText());
-
-            TranscriptDto reusltTranscriptDto = transcriptParsingService.getTranscriptIdTimestampsAndTextByVideoId(videoId);
-
-            assertThat(reusltTranscriptDto.getId()).isEqualTo(transcriptDto.getId());
-            assertThat(reusltTranscriptDto.getTimestampsAndText()).isEqualTo(transcriptDto.getTimestampsAndText());
-        }
-
-        @ParameterizedTest
-        @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_TranscriptInvalid.csv",
-                numLinesToSkip = 1)
-        void givenGetTranscriptByVideoId_whenEnteringInvalidVideoId_thenThrowException(String title, String videoId){
-            assertThrows(InvalidIdException.class, () -> transcriptParsingService.getTranscriptIdTimestampsAndTextByVideoId(videoId));
         }
     }
 }

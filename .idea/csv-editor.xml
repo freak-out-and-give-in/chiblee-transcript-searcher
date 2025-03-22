@@ -3,6 +3,20 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="\src\test\resources\csv\service\base-methods\BaseMethodsData.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\test\resources\csv\service\inverted-index-dto-service\InvertedIndexData.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\src\test\resources\csv\service\inverted-index-dto-service\InvertedIndexDtoServiceData.csv">
           <value>
             <Attribute>
@@ -10,7 +24,84 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\src\test\resources\csv\service\inverted-index-dto-service\InvertedIndexTimestampsData.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\test\resources\csv\service\inverted-index-parsing-service\InvertedIndexParsingServiceData_Invalid.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\test\resources\csv\service\inverted-index-parsing-service\InvertedIndexParsingServiceData_Valid.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\test\resources\csv\service\inverted-index-service\InvertedIndexServiceData.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\test\resources\csv\service\inverted-index-writing-service\InvertedIndexWritingServiceData.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\test\resources\csv\service\transcript-parsing-service\TranscriptParsingServiceData_PhraseContextInvalid.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\test\resources\csv\service\transcript-parsing-service\TranscriptParsingServiceData_PhraseContextValid.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\test\resources\csv\service\transcript-parsing-service\TranscriptParsingServiceData_TranscriptInvalid.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\test\resources\csv\service\transcript-parsing-service\TranscriptParsingServiceData_TranscriptValid.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\src\test\resources\csv\service\transcript-service\TranscriptServiceData.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\test\resources\csv\service\transcript-txt-parsing-service\TranscriptTxtParsingServiceData.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\src\test\resources\csv\service\transcript-txt-writing-service\TranscriptTxtWritingServiceData.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

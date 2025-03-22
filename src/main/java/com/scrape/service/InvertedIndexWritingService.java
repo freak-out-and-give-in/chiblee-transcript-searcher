@@ -19,11 +19,16 @@ public class InvertedIndexWritingService {
 
     private InvertedIndexService invertedIndexService;
 
+    private InvertedIndexDtoService invertedIndexDtoService;
+
     private TranscriptTxtParsingService transcriptTxtParsingService;
 
     @Autowired
-    public InvertedIndexWritingService(InvertedIndexService invertedIndexService, TranscriptTxtParsingService transcriptTxtParsingService) {
+    public InvertedIndexWritingService(InvertedIndexService invertedIndexService,
+                                       InvertedIndexDtoService invertedIndexDtoService,
+                                       TranscriptTxtParsingService transcriptTxtParsingService) {
         this.invertedIndexService = invertedIndexService;
+        this.invertedIndexDtoService = invertedIndexDtoService;
         this.transcriptTxtParsingService = transcriptTxtParsingService;
     }
 
@@ -42,8 +47,9 @@ public class InvertedIndexWritingService {
             } else { // Else, the word is in the database already
                 InvertedIndex currentInvertedIndex = invertedIndexService.getInvertedIndex(tempInvertedIndex.getTerm());
 
-                // Finds the common and uncommon ids between the 2 inverted indexes
-                InvertedIndexDto newInvertedIndexDto = invertedIndexService.findAnyNewIdsAndTimestampsForThisTerm(tempInvertedIndex);
+                // Finds the shared and non-shared ids between the 2 inverted indexes
+                InvertedIndexDto newInvertedIndexDto = invertedIndexDtoService
+                        .mergeSharedAndNotSharedIds(currentInvertedIndex, tempInvertedIndex);
 
                 // If the updated inverted index dto has different data than the currently stored data
                 if (!newInvertedIndexDto.getMapOfIdWithTimestamps().toString().equals(tempInvertedIndex.getVideoIdWithTimestamps())) {

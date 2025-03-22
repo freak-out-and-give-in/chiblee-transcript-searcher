@@ -2,7 +2,6 @@ package com.scrape.service;
 
 import com.scrape.dto.InvertedIndexDto;
 import com.scrape.exception.InvalidPhraseException;
-import com.scrape.model.InvertedIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,26 +14,23 @@ public class InvertedIndexParsingService {
 
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private InvertedIndexService invertedIndexService;
-
     private InvertedIndexDtoService invertedIndexDtoService;
 
     private Base base;
 
     @Autowired
-    public InvertedIndexParsingService(InvertedIndexService invertedIndexService, InvertedIndexDtoService invertedIndexDtoService) {
-        this.invertedIndexService = invertedIndexService;
+    public InvertedIndexParsingService(InvertedIndexDtoService invertedIndexDtoService) {
         this.invertedIndexDtoService = invertedIndexDtoService;
         base = new Base();
     }
 
     public LinkedHashMap<String, List<Integer>> findThisPhrase(String phrase) {
-        validateInput(phrase);
+        validatePhraseInput(phrase);
 
         return searchForPhrase(phrase);
     }
 
-    private void validateInput(String phrase) {
+    private void validatePhraseInput(String phrase) {
         log.debug("Validating input for the phrase {}", phrase);
 
         if (phrase.isEmpty()) {
@@ -58,20 +54,17 @@ public class InvertedIndexParsingService {
     private LinkedHashMap<String, List<Integer>> searchForPhrase(String phrase) {
         log.info("Searching for the phrase {}", phrase);
 
-        String[] arrayOfWords = phrase.toLowerCase().trim().split(" ");
-        List<String> listOfWordsNotRemoved = new ArrayList<>(Arrays.asList(arrayOfWords));
-
-        List<InvertedIndexDto> listOfInvertedIndexDtos = invertedIndexDtoService.convertToInvertedIndexDtos(listOfWordsNotRemoved, arrayOfWords, phrase);
-        List<InvertedIndexDto> commonIdsWithTimestamps = invertedIndexDtoService.getCommonIdsWithTimestamps(listOfInvertedIndexDtos);
-        LinkedHashMap<String, List<String>> idsAndTimestamps = filterInvertedIndexForCloseTimestamps(commonIdsWithTimestamps);
+        List<InvertedIndexDto> listOfInvertedIndexDtos = invertedIndexDtoService.findDtosOfPhrase(phrase);
+        List<InvertedIndexDto> sharedIdsWithTimestamps = invertedIndexDtoService.calculateSharedIdsWithTimestamps(listOfInvertedIndexDtos);
+        LinkedHashMap<String, List<String>> idsAndTimestamps = filterInvertedIndexForCloseTimestamps(sharedIdsWithTimestamps);
 
         return convertTimestampsToSecondsAsMap(idsAndTimestamps);
     }
 
-    private LinkedHashMap<String, List<String>> filterInvertedIndexForCloseTimestamps(List<InvertedIndexDto> listOfInvertedIndexDtos) {
-        log.debug("Filtering common ids with timestamps so only the timestamps close to each other are recognised as a part of a phrase");
+    private LinkedHashMap<String, List<String>> filterInvertedIndexForCloseTimestamps(List<InvertedIndexDto> sharedIdsWithTimestamps) {
+        log.debug("Filtering shared ids with timestamps so only the timestamps close to each other are recognised as a part of a phrase");
 
-        InvertedIndexDto firstInvertedIndexDto = listOfInvertedIndexDtos.getFirst();
+        InvertedIndexDto firstInvertedIndexDto = sharedIdsWithTimestamps.getFirst();
         List<String> listOfIds = firstInvertedIndexDto.getMapOfIdWithTimestamps().keySet().stream().toList();
 
         LinkedHashMap<String, List<String>> idsAndTimestampsForThePhrase = new LinkedHashMap<>();
@@ -79,7 +72,7 @@ public class InvertedIndexParsingService {
         for (String currentId : listOfIds) {
             List<String> firstTimestamps = firstInvertedIndexDto.getMapOfIdWithTimestamps().get(currentId);
             List<List<String>> allTimestampsFromSpecificId = new ArrayList<>(invertedIndexDtoService
-                    .getInvertedIndexDtosTimestamps(listOfInvertedIndexDtos, currentId));
+                    .calculateTimestamps(sharedIdsWithTimestamps, currentId));
 
             // Loops over first II object.get(id)
             for (String firstTimestamp : firstTimestamps) {
@@ -87,7 +80,7 @@ public class InvertedIndexParsingService {
                 listOfTimestamps.add(firstTimestamp);
 
                 // Loops over the words
-                for (int w = 0; w < listOfInvertedIndexDtos.size(); w++) {
+                for (int w = 0; w < sharedIdsWithTimestamps.size(); w++) {
                     boolean matchFlag = false;
 
                     // Skips the first word as we are already using it as our base word
@@ -119,7 +112,7 @@ public class InvertedIndexParsingService {
                 }
 
                 // If the list of timestamps is full, then a close timestamp was found in all the word's same id
-                if (listOfTimestamps.size() == listOfInvertedIndexDtos.size()) {
+                if (listOfTimestamps.size() == sharedIdsWithTimestamps.size()) {
                     // Adding the id and the earliest timestamp to the data structure we will return
                     String earliestTimestamp = getEarliestTimestamp(listOfTimestamps);
 

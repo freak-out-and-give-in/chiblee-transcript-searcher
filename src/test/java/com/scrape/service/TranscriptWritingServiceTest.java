@@ -25,17 +25,18 @@ class TranscriptWritingServiceTest {
     private TranscriptTxtParsingService transcriptTxtParsingService;
 
     @ParameterizedTest
-    @CsvFileSource(resources = "/csv/service/transcript-service/TranscriptServiceData.csv", numLinesToSkip = 1)
+    @CsvFileSource(resources = "/csv/service/transcript-parsing-service/TranscriptParsingServiceData_TranscriptValid.csv", numLinesToSkip = 1)
     void addTranscriptsToDatabase(String title, String id) {
-        HashMap<String, LinkedHashMap<String, String>> map = new HashMap<>();
-        LinkedHashMap<String, String> linkedMap = new LinkedHashMap<>();
-        map.put(title + " [" + id + "]", linkedMap);
+        // titleAndId, <timestamps,text>
+        HashMap<String, LinkedHashMap<String, String>> transcripts = new HashMap<>();
+        LinkedHashMap<String, String> timestampsAndTextMap = new LinkedHashMap<>();
 
-        when(transcriptTxtParsingService.getTranscriptFromEachFile()).thenReturn(map);
+        transcripts.put(title + " [" + id + "]", timestampsAndTextMap);
+
+        when(transcriptTxtParsingService.getTranscriptFromEachFile()).thenReturn(transcripts);
 
         transcriptWritingService.addTranscriptsToDatabase();
 
-        verify(transcriptService, times(1)).deleteAll();
         verify(transcriptService, times(1)).addOrUpdate(any());
     }
 }

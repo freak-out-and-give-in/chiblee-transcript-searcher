@@ -22,8 +22,6 @@ public class InvertedIndexDtoService {
         this.invertedIndexService = invertedIndexService;
     }
 
-    // Converts a HashMap.toString() to a list
-    // e.g. {s0sKAjaPHu8=[03:52:31.040], p4oGmEGaAew=[03:00:11.680, 03:14:02.399, 03:14:05.200], ebM8fywbYbQ=[00:22:06.059]}
     public InvertedIndexDto convertInvertedIndexToDto(InvertedIndex invertedIndex) {
         LinkedHashMap<String, List<String>> mapOfIdWithTimestamps = new LinkedHashMap<>();
         String videoIdWithTimestampsString = invertedIndex.getVideoIdWithTimestamps();
@@ -34,7 +32,11 @@ public class InvertedIndexDtoService {
 
         for (String idAndTimestamps : listOfInvertedIndexIdsAndTimestamps) {
             // Adding on the ending square bracket that's removed by split
-            idAndTimestamps += "]";
+            // It's a conditional because the square bracket after the last id & last timestamp is not removed
+            if (!idAndTimestamps.endsWith("]")) {
+                idAndTimestamps += "]";
+            }
+
             String id = idAndTimestamps.substring(0, 11);
             String timestamps = idAndTimestamps.substring(13, idAndTimestamps.length() - 1);
 
@@ -45,38 +47,41 @@ public class InvertedIndexDtoService {
         return new InvertedIndexDto(invertedIndex.getTerm(), mapOfIdWithTimestamps);
     }
 
-    public List<InvertedIndexDto> convertToInvertedIndexDtos(List<String> listOfWordsNotRemoved, String[] arrayOfWords,
-                                                             String phrase) {
+    public List<InvertedIndexDto> findDtosOfPhrase(String phrase) {
+        log.debug("Finding the DTOs of these words: {}", phrase);
+
+        String[] phraseWords = phrase.toLowerCase().trim().split(" ");
+
         // term, (id(0), timestamps(1+))
         List<InvertedIndexDto> listOfInvertedIndexDtos = new ArrayList<>();
 
-        for (String tempWord : arrayOfWords) {
-            InvertedIndex invertedIndex = invertedIndexService.getInvertedIndex(tempWord);
+        for (String word : phraseWords) {
+            InvertedIndex invertedIndex = invertedIndexService.getInvertedIndex(word);
 
-            // Word cannot be found (might be a StopWord)
+            // Ignore if the word cannot be found (might be a StopWord)
             if (invertedIndex == null) {
-                listOfWordsNotRemoved.remove(tempWord);
                 continue;
             }
 
+            // If the word does exist in our database, then convert it to a DTO and add it to the list
             InvertedIndexDto invertedIndexDto = convertInvertedIndexToDto(invertedIndex);
             listOfInvertedIndexDtos.add(invertedIndexDto);
         }
 
         if (listOfInvertedIndexDtos.isEmpty()) {
-            throw new InvalidPhraseException("The phrase " + phrase + " does not contain any words that are in our database");
+            throw new InvalidPhraseException("The phrase '" + phrase + "' does not contain any words that are in our database");
         }
 
         return listOfInvertedIndexDtos;
     }
 
-    public InvertedIndexDto getInvertedIndexDtoWithCommonIds(InvertedIndexDto invertedIndexDto, List<String> commonIds) {
+    public InvertedIndexDto calculateInvertedIndexDtoWithTheseIds(InvertedIndexDto invertedIndexDto, List<String> ids) {
         LinkedHashMap<String, List<String>> mapOfIdWithTimestamps = new LinkedHashMap<>();
         for (Map.Entry<String, List<String>> map : invertedIndexDto.getMapOfIdWithTimestamps().entrySet()) {
             String id = map.getKey();
 
-            // If the id is a common id
-            if (commonIds.contains(id)) {
+            // If the id is in the list
+            if (ids.contains(id)) {
                 List<String> timestamps = map.getValue();
 
                 mapOfIdWithTimestamps.put(id, timestamps);
@@ -86,31 +91,35 @@ public class InvertedIndexDtoService {
         return new InvertedIndexDto(invertedIndexDto.getTerm(), mapOfIdWithTimestamps);
     }
 
-    public List<List<String>> getInvertedIndexDtosTimestamps(List<InvertedIndexDto> listOfInvertedIndexDtos, String id) {
+    // Calculates all the timestamps for the id
+    public List<List<String>> calculateTimestamps(List<InvertedIndexDto> listOfInvertedIndexDtos, String id) {
         List<List<String>> allTimestamps = new ArrayList<>();
 
         for (InvertedIndexDto invertedIndexDto : listOfInvertedIndexDtos) {
-            List<String> timestamps = new ArrayList<>(invertedIndexDto.getMapOfIdWithTimestamps().get(id));
-            allTimestamps.add(timestamps);
+            // I don't think a conditional is needed as every inverted index contains the id
+            List<String> listOfIterationTimestamps = new ArrayList<>(invertedIndexDto.getMapOfIdWithTimestamps().get(id));
+            allTimestamps.add(listOfIterationTimestamps);
         }
 
         return allTimestamps;
     }
 
-    public List<InvertedIndexDto> getCommonIdsWithTimestamps(List<InvertedIndexDto> listOfInvertedIndexDtos) {
-        List<String> commonIds = getCommonIds(listOfInvertedIndexDtos);
+    public List<InvertedIndexDto> calculateSharedIdsWithTimestamps(List<InvertedIndexDto> listOfInvertedIndexDtos) {
+        // Calculates the shared ids between the inverted indexes
+        List<String> sharedIds = calculateSharedIds(listOfInvertedIndexDtos);
         List<InvertedIndexDto> newListOfInvertedIndexDtos = new ArrayList<>();
 
-        // Each map looped over represents a word
+        // Each object looped over represents a word
         for (InvertedIndexDto invertedIndexDto : listOfInvertedIndexDtos) {
-            InvertedIndexDto newInvertedIndexDto = getInvertedIndexDtoWithCommonIds(invertedIndexDto, commonIds);
-            newListOfInvertedIndexDtos.add(newInvertedIndexDto);
+            // This operation is so only the shared ids are present in each inverted index
+            InvertedIndexDto iteratedInvertedIndexDto = calculateInvertedIndexDtoWithTheseIds(invertedIndexDto, sharedIds);
+            newListOfInvertedIndexDtos.add(iteratedInvertedIndexDto);
         }
 
         return newListOfInvertedIndexDtos;
     }
 
-    private List<String> getCommonIds(List<InvertedIndexDto> listOfInvertedIndexDtos) {
+    private List<String> calculateSharedIds(List<InvertedIndexDto> listOfInvertedIndexDtos) {
         List<List<String>> listOfListOfIds = new ArrayList<>();
 
         // Fills the list-of ids with all ids
@@ -120,16 +129,20 @@ public class InvertedIndexDtoService {
         }
 
         // Makes a list with only the ids that appear in every word
-        List<String> listOfCommonIds = listOfListOfIds.getFirst();
+        List<String> listOfSharedIds = listOfListOfIds.getFirst();
         for (int i = 1; i < listOfListOfIds.size(); i++) {
-            listOfCommonIds.retainAll(listOfListOfIds.get(i));
+            listOfSharedIds.retainAll(listOfListOfIds.get(i));
         }
 
-        return listOfCommonIds;
+        return listOfSharedIds;
     }
 
-    public InvertedIndexDto mergeCommonAndUncommonIds(InvertedIndexDto currentInvertedIndexDto,
-                                                      InvertedIndexDto newInvertedIndexDto) {
+    public InvertedIndexDto mergeSharedAndNotSharedIds(InvertedIndex currentInvertedIndex,
+                                                       InvertedIndex newInvertedIndex) {
+        // Convert the inverted indexes to DTOs
+        InvertedIndexDto currentInvertedIndexDto = convertInvertedIndexToDto(currentInvertedIndex);
+        InvertedIndexDto newInvertedIndexDto = convertInvertedIndexToDto(newInvertedIndex);
+
         // Leaves the newInvertedIndexDto with only the unique ids between the new and current dto
         newInvertedIndexDto.getMapOfIdWithTimestamps().keySet()
                 .removeAll(currentInvertedIndexDto.getMapOfIdWithTimestamps().keySet());

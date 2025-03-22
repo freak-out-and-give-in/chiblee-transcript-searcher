@@ -1,21 +1,18 @@
 ------------------------------------------------------------------------------------------------------------
 CHANGE/ADD FEATURES TODO
-- Make sure all the DTO conversion logic is encapsulated in the InvertedIndexDtoService class, including in tests
+- Make sure all the Inverted Index DTO conversion logic is encapsulated in the InvertedIndexDtoService class, including in tests
+- Make sure all the Transcript DTO conversion logic is encapsulated in the InvertedIndexDtoService class, including in tests
 
 
 - Make webpages look nicer
 
 ------------------------------------------------------------------------------------------------------------
 TESTING TODO
-- Write tests in TranscriptTxtWritingServiceTest
 - Fix/rewrite the controller tests
-- Add tests to the txt transcripts to check whether our parsing rules match
-- Update TranscriptWritingServiceTest() to reflect the db not always deleting everything first, gaining the ability
-to add transcripts to the current list
-
-- Update InvertedIndexWritingServiceTest() as downloading to the db now doesn't delete and can update the rows instead
-- Update InvertedIndexServiceTest() to add the new methods
-- Transfer DTO tests from InvertedIndexParsingServiceTest() to InvertedIndexDtoServiceTest()
-- Write tests for InvertedIndexDtoService()
+- Add data-driven testing to all service tests
+- Write tests in TranscriptTxtWritingServiceTest
+- Fix InvertedIndexParsingServiceTest.findThisPhrase()
+- Update AdminController() method names and the end point names, including in JS files, to reflect the addition of rows
+instead of rewriting everything
 
 ------------------------------------------------------------------------------------------------------------

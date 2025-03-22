@@ -48,7 +48,7 @@ public class Base {
     }
 
     public String getStopWordsPath() {
-        return "demo/src/main/resources/static/text/stopwords.txt";
+        return "src/main/resources/static/text/stopwords.txt";
     }
 
 }

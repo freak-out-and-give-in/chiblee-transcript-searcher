@@ -1,13 +1,15 @@
 package com.scrape.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(MockitoExtension.class)
 class BaseTest {
 
     @Mock
@@ -16,10 +18,6 @@ class BaseTest {
     @BeforeEach
     void setUp() {
         base = new Base();
-    }
-
-    @AfterEach
-    void tearDown() {
     }
 
     @ParameterizedTest

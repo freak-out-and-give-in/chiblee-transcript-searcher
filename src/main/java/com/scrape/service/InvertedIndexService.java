@@ -1,6 +1,5 @@
 package com.scrape.service;
 
-import com.scrape.dto.InvertedIndexDto;
 import com.scrape.exception.PrivateException;
 import com.scrape.model.InvertedIndex;
 import com.scrape.repository.InvertedIndexRepository;
@@ -9,10 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-
 @Service
 public class InvertedIndexService {
 
@@ -20,17 +15,9 @@ public class InvertedIndexService {
 
     private InvertedIndexRepository invertedIndexRepository;
 
-    private InvertedIndexParsingService invertedIndexParsingService;
-
-    private InvertedIndexDtoService invertedIndexDtoService;
-
     @Autowired
-    public InvertedIndexService(InvertedIndexRepository invertedIndexRepository,
-                                InvertedIndexParsingService invertedIndexParsingService,
-                                InvertedIndexDtoService invertedIndexDtoService) {
+    public InvertedIndexService(InvertedIndexRepository invertedIndexRepository) {
         this.invertedIndexRepository = invertedIndexRepository;
-        this.invertedIndexParsingService = invertedIndexParsingService;
-        this.invertedIndexDtoService = invertedIndexDtoService;
     }
 
     // No error here, as sometimes it's ok to not find a word, with no need to log an error message
@@ -53,14 +40,6 @@ public class InvertedIndexService {
         }
 
         invertedIndexRepository.save(invertedIndex);
-    }
-
-    public InvertedIndexDto findAnyNewIdsAndTimestampsForThisTerm(InvertedIndex newInvertedIndex) {
-        InvertedIndexDto currentInvertedIndexDto = invertedIndexDtoService.convertInvertedIndexToDto(
-                getInvertedIndex(newInvertedIndex.getTerm()));
-        InvertedIndexDto newInvertedIndexDto = invertedIndexDtoService.convertInvertedIndexToDto(newInvertedIndex);
-
-        return invertedIndexDtoService.mergeCommonAndUncommonIds(currentInvertedIndexDto, newInvertedIndexDto);
     }
 
     public void deleteAll() {

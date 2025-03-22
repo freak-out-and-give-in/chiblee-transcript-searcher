@@ -4,6 +4,7 @@ import com.scrape.config.RateLimited;
 import com.scrape.dto.PhraseDto;
 import com.scrape.dto.TranscriptDto;
 import com.scrape.service.InvertedIndexParsingService;
+import com.scrape.service.TranscriptDtoService;
 import com.scrape.service.TranscriptParsingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +25,15 @@ public class SearchController {
 
     private TranscriptParsingService transcriptParsingService;
 
+    private TranscriptDtoService transcriptDtoService;
+
     @Autowired
-    public SearchController(InvertedIndexParsingService invertedIndexParsingService, TranscriptParsingService transcriptParsingService) {
+    public SearchController(InvertedIndexParsingService invertedIndexParsingService,
+                            TranscriptParsingService transcriptParsingService,
+                            TranscriptDtoService transcriptDtoService) {
         this.invertedIndexParsingService = invertedIndexParsingService;
         this.transcriptParsingService = transcriptParsingService;
+        this.transcriptDtoService = transcriptDtoService;
     }
 
     @RateLimited
@@ -46,7 +52,7 @@ public class SearchController {
     public TranscriptDto findTranscriptByTitle(@RequestParam String title) {
         log.info("Finding a transcript with a title of {}", title);
 
-        return transcriptParsingService.getTranscriptIdTimestampsAndTextByTitle(title);
+        return transcriptDtoService.getTranscriptIdTimestampsAndTextByTitle(title);
     }
 
     @RateLimited
@@ -54,7 +60,7 @@ public class SearchController {
     public TranscriptDto findTranscriptByVideoId(@RequestParam String videoId) {
         log.info("Finding a transcript with an id of {}", videoId);
 
-        return transcriptParsingService.getTranscriptIdTimestampsAndTextByVideoId(videoId);
+        return transcriptDtoService.getTranscriptIdTimestampsAndTextByVideoId(videoId);
     }
 
 }

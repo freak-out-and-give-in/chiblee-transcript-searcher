@@ -23,12 +23,10 @@ public class TranscriptWritingService {
         this.transcriptTxtParsingService = transcriptTxtParsingService;
     }
 
-    // This should only be used instead of adding to the database if there is thought to be a problem with the current
-    // data, and that it needs to be wiped.
-    // For example, if we change what the characters are that separate each line
     public void addTranscriptsToDatabase() {
         log.info("Writing transcripts to the database...");
 
+        // titleAndId, <timestamps,text>
         HashMap<String, LinkedHashMap<String, String>> transcripts = transcriptTxtParsingService.getTranscriptFromEachFile();
 
         int transcriptCount = 0;
@@ -49,19 +47,8 @@ public class TranscriptWritingService {
                 }
             }
 
-            StringBuilder sb = new StringBuilder();
-            for (Map.Entry<String, String> transcript : transcripts.get(titleAndId).entrySet()) {
-                String timestamp = transcript.getKey();
-                String text = transcript.getValue();
-
-                sb.append(timestamp)
-                        // Random characters to be used to split the timestamp and text.
-                        // Must not be something that is ever said.
-                        .append(text)
-                        .append("#hg");
-            }
-
-            String timestampsAndText = sb.toString().trim();
+            LinkedHashMap<String, String> transcriptTimestampsAndText = transcripts.get(titleAndId);
+            String timestampsAndText = buildTimestampsAndTextString(transcriptTimestampsAndText);
             timestampsAndText = replaceMusicAndExplicitFromText(timestampsAndText);
 
             Transcript transcript = new Transcript(videoId, title, timestampsAndText);
@@ -71,6 +58,22 @@ public class TranscriptWritingService {
         }
 
         log.info("Successfully added {} transcripts to the database", transcriptCount);
+    }
+
+    private String buildTimestampsAndTextString(LinkedHashMap<String, String> transcriptTimestampsAndText) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> transcript : transcriptTimestampsAndText.entrySet()) {
+            String timestamp = transcript.getKey();
+            String text = transcript.getValue();
+
+            sb.append(timestamp)
+                    // Random characters to be used to split the timestamp and text.
+                    // Must not be something that is ever said.
+                    .append(text)
+                    .append("#hg");
+        }
+
+        return sb.toString().trim();
     }
 
     // Same method used when writing to the inverted index.

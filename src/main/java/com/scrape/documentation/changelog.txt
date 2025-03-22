@@ -1,3 +1,10 @@
+CHANGES
+
+22/03/25
+- Make a dedicated Inverted Index DTO class with tests
+- Make a dedicated Transcript DTO class with tests
+- Simplified InvertedIndexServiceTest() and removed an unnecessary method
+
 21/03/25
 - Change TranscriptTxtWritingService.updateArchive() so that the archive populates videos at the same time as downloading
 - Be able to add to the transcript database, instead of clearing and rewriting

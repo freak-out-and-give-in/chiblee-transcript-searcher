@@ -54,15 +54,8 @@ class InvertedIndexWritingServiceTest {
         // TitleAndId, Timestamp, List(Text)
         HashMap<String, HashMap<String, List<String>>> invertedIndex = invertedIndexWritingService.buildInvertedIndex();
 
-        HashMap<String, HashMap<String, List<String>>> invertedIndexTest = new HashMap<>();
-        invertedIndexTest.put("love", new HashMap<>(Map.of("tle [21340d]", List.of("134", "654"))));
-
-        System.out.println(invertedIndexTest);
-
         assertThat("{love={tle [21340d=[00:13:30, 02:55:34]}, wound={tle [21340d=[02:55:34]}, machina={tle [21340d=[04:14:52]}, stand={tle [21340d=[00:13:30]}," +
                 " inside={tle [21340d=[00:13:30]}, you={tle [21340d=[00:13:30]}}").isEqualTo(invertedIndex + "");
-
-        verify(invertedIndexService, times(1)).deleteAll();
     }
 
     private static @NotNull HashMap<String, LinkedHashMap<String, String>> getStringLinkedHashMapHashMap() {
